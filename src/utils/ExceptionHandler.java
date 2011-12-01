@@ -24,8 +24,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(NullPointerException ex, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (!(message == null || message.isEmpty()))
 		{
 			System.out.println("[ERROR] This message was provided with the exception:");
@@ -54,8 +54,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(IOException ex, String filename, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (filename == null)
 		{
 			System.out.println("[ERROR] No filename was specified for this exception.");
@@ -103,8 +103,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(SecurityException ex, String blocked, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (blocked == null)
 		{
 			System.out.println("[ERROR] The blocked item is unknown.");
@@ -152,8 +152,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(NoSuchMethodException ex, String methodName, String className, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (methodName == null)
 		{
 			System.out.println("[ERROR] The non-existant method name is unknown.");
@@ -221,8 +221,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(IllegalArgumentException ex, String methodName, String className, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (methodName == null)
 		{
 			System.out.println("[ERROR] The inappropriately called method name is unknown.");
@@ -290,8 +290,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(IllegalAccessException ex, String methodName, String className, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (methodName == null)
 		{
 			System.out.println("[ERROR] The method name is unknown.");
@@ -359,8 +359,8 @@ public class ExceptionHandler
 	 */
 	public static void receive(InvocationTargetException ex, String methodName, String className, String message)
 	{
-		System.out.println("[ERROR] Runtime error:");
 		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
 		if (methodName == null)
 		{
 			System.out.println("[ERROR] The method name is unknown.");
@@ -416,5 +416,53 @@ public class ExceptionHandler
 	public static void receive(InvocationTargetException ex)
 	{
 		receive(ex, null, null, null);
+	}
+	
+	/**
+	 * Receives IndexOutOfBoundsExceptions, thrown to indicate that an index of some sort is out of range.
+	 * 
+	 * @param ex - the IndexOutOfBoundsException thrown
+	 * @param index - the index that may be out of range
+	 * @param message - a special message to be printed
+	 */
+	public static void receive(IndexOutOfBoundsException ex, int index, String message)
+	{
+		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
+		System.out.println("[ERROR] A possible index reference that is out of range is " + index + ".");
+		if (!(message == null || message.isEmpty()))
+		{
+			System.out.println("[ERROR] This message was provided with the exception:");
+			System.out.println("[ERROR] " + message);
+		}
+		System.out.println("[ERROR] This exception is not fatal and the so the program will continue running.");
+	}
+	
+	/**
+	 * Receives IndexOutOfBoundsExceptions, thrown to indicate that an index of some sort is out of range.
+	 * 
+	 * @param ex - the IndexOutOfBoundsException thrown
+	 * @param message - a special message to be printed
+	 */
+	public static void receive(IndexOutOfBoundsException ex, String message)
+	{
+		ex.printStackTrace();
+		System.out.println("[ERROR] Runtime error:");
+		if (!(message == null || message.isEmpty()))
+		{
+			System.out.println("[ERROR] This message was provided with the exception:");
+			System.out.println("[ERROR] " + message);
+		}
+		System.out.println("[ERROR] This exception is not fatal and the so the program will continue running.");
+	}
+	
+	/**
+	 * Receives IndexOutOfBoundsExceptions, thrown to indicate that an index of some sort is out of range.
+	 * 
+	 * @param ex - the IndexOutOfBoundsException thrown
+	 */
+	public static void receive(IndexOutOfBoundsException ex)
+	{
+		receive(ex, null);
 	}
 }

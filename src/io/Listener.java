@@ -24,24 +24,28 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 {
 	private ArrayList<NotificationRequest> notifications;
 	
-	public static final int KEY_PRESSED = KeyEvent.KEY_PRESSED;
-	public static final int KEY_RELEASED = KeyEvent.KEY_RELEASED;
-	public static final int MOUSE_PRESSED = MouseEvent.MOUSE_PRESSED;
-	public static final int MOUSE_RELEASED = MouseEvent.MOUSE_RELEASED;
-	public static final int MOUSE_WHEEL = MouseEvent.MOUSE_WHEEL;
-	public static final int MOUSE_MOVED = MouseEvent.MOUSE_MOVED;
-	public static final int SCROLL_UP = -1;
-	public static final int SCROLL_DOWN = 1;
-	public static final int SCROLL_BOTH = 0;
-	public static final int BUTTON1 = MouseEvent.BUTTON1;
-	public static final int BUTTON2 = MouseEvent.BUTTON2;
-	public static final int BUTTON3 = MouseEvent.BUTTON3;
+	public static final int TYPE_KEY_PRESSED = KeyEvent.KEY_PRESSED;
+	public static final int TYPE_KEY_RELEASED = KeyEvent.KEY_RELEASED;
+	public static final int TYPE_MOUSE_MOVED = MouseEvent.MOUSE_MOVED;
+	public static final int TYPE_MOUSE_PRESSED = MouseEvent.MOUSE_PRESSED;
+	public static final int TYPE_MOUSE_RELEASED = MouseEvent.MOUSE_RELEASED;
+	public static final int TYPE_MOUSE_WHEEL = MouseEvent.MOUSE_WHEEL;
+	
+	public static final int CODE_BUTTON1 = MouseEvent.BUTTON1;
+	public static final int CODE_BUTTON2 = MouseEvent.BUTTON2;
+	public static final int CODE_BUTTON3 = MouseEvent.BUTTON3;
+	public static final int CODE_BUTTON_ALL = MouseEvent.NOBUTTON;
+	public static final int CODE_KEY_ALL = -2;
+	public static final int CODE_SCROLL_BOTH = 0;
+	public static final int CODE_SCROLL_DOWN = 1;
+	public static final int CODE_SCROLL_UP = -1;
+	
 	private int key_pressed_start;
 	private int key_released_start;
+	private int mouse_moved_start;
 	private int mouse_pressed_start;
 	private int mouse_released_start;
 	private int mouse_wheel_start;
-	private int mouse_moved_start;
 	
 	private Point mouseLocation;
 	
@@ -73,9 +77,9 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	 * @param sendCode - whether the method call should use the code as the first parameter
 	 * @param sendType - whether the method call should use the type as the second parameter (first if the code is not send)
 	 */
-	public void requestNotification(Object object, Method method, int type, int code, boolean sendCode, boolean sendType)
+	public void requestNotification(Object object, Method method, int type, int code)
 	{
-		notifications.add(getStart(type), new NotificationRequest(object, method, type, code, sendCode, sendType));
+		notifications.add(getStart(type), new NotificationRequest(object, method, type, code));
 		shiftStarts(type);
 	}
 	
@@ -90,9 +94,9 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	 * @param sendCode - whether the method call should use the code as the first parameter
 	 * @param sendType - whether the method call should use the type as the second parameter (first if the code is not send)
 	 */
-	public void requestNotification(Object object, String methodName, int type, int code, boolean sendCode, boolean sendType)
+	public void requestNotification(Object object, String methodName, int type, int code)
 	{
-		notifications.add(getStart(type), new NotificationRequest(object, methodName, type, code, sendCode, sendType));
+		notifications.add(getStart(type), new NotificationRequest(object, methodName, type, code));
 		shiftStarts(type);
 	}
 	
@@ -104,10 +108,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		for (int i = key_pressed_start; i < key_released_start; i++)
 		{
-			if (notifications.get(i).getCode() == event.getKeyCode())
-			{
-				notifications.get(i).call();
-			}
+			notifications.get(i).call(event);
 		}
 		event.consume();
 	}
@@ -120,10 +121,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		for (int i = key_released_start; i < mouse_pressed_start; i++)
 		{
-			if (notifications.get(i).getCode() == event.getKeyCode())
-			{
-				notifications.get(i).call();
-			}
+			notifications.get(i).call(event);
 		}
 		event.consume();
 	}
@@ -144,10 +142,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		for (int i = mouse_pressed_start; i < mouse_released_start; i++)
 		{
-			if (notifications.get(i).getCode() == event.getButton())
-			{
-				notifications.get(i).call();
-			}
+			notifications.get(i).call(event);
 		}
 		event.consume();
 	}
@@ -160,10 +155,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		for (int i = mouse_released_start; i < mouse_wheel_start; i++)
 		{
-			if (notifications.get(i).getCode() == event.getButton())
-			{
-				notifications.get(i).call();
-			}
+			notifications.get(i).call(event);
 		}
 		event.consume();
 	}
@@ -200,7 +192,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		for (int i = mouse_moved_start; i < notifications.size(); i++)
 		{
-			notifications.get(i).call(event.getPoint());
+			notifications.get(i).call(event);
 		}
 		event.consume();
 	}
@@ -222,10 +214,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		for (int i = mouse_wheel_start; i < mouse_moved_start; i++)
 		{
-			if ((notifications.get(i).getCode() == SCROLL_BOTH || (notifications.get(i).getCode() > 0) == (event.getWheelRotation() > 0)))
-			{
-				notifications.get(i).call(event.getWheelRotation());
-			}
+			notifications.get(i).call(event);
 		}
 		event.consume();
 	}
@@ -282,7 +271,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	 */
 	private void shiftStarts(int type)
 	{
-		if (type == KEY_PRESSED)
+		if (type == TYPE_KEY_PRESSED)
 		{
 			key_released_start++;
 			mouse_pressed_start++;
@@ -290,25 +279,25 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 			mouse_wheel_start++;
 			mouse_moved_start++;
 		}
-		else if (type == KEY_RELEASED)
+		else if (type == TYPE_KEY_RELEASED)
 		{
 			mouse_pressed_start++;
 			mouse_released_start++;
 			mouse_wheel_start++;
 			mouse_moved_start++;
 		}
-		else if (type == MOUSE_PRESSED)
+		else if (type == TYPE_MOUSE_PRESSED)
 		{
 			mouse_released_start++;
 			mouse_wheel_start++;
 			mouse_moved_start++;
 		}
-		else if (type == MOUSE_RELEASED)
+		else if (type == TYPE_MOUSE_RELEASED)
 		{
 			mouse_wheel_start++;
 			mouse_moved_start++;
 		}
-		else if (type == MOUSE_WHEEL)
+		else if (type == TYPE_MOUSE_WHEEL)
 		{
 			mouse_moved_start++;
 		}
@@ -326,17 +315,17 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	{
 		switch(type)
 		{
-		case KEY_PRESSED:
+		case TYPE_KEY_PRESSED:
 			return key_pressed_start;
-		case KEY_RELEASED:
+		case TYPE_KEY_RELEASED:
 			return key_released_start;
-		case MOUSE_PRESSED:
+		case TYPE_MOUSE_PRESSED:
 			return mouse_pressed_start;
-		case MOUSE_RELEASED:
+		case TYPE_MOUSE_RELEASED:
 			return mouse_released_start;
-		case MOUSE_WHEEL:
+		case TYPE_MOUSE_WHEEL:
 			return mouse_wheel_start;
-		case MOUSE_MOVED:
+		case TYPE_MOUSE_MOVED:
 			return mouse_moved_start;
 		default:
 			return -1;
