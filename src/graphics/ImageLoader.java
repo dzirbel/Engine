@@ -5,9 +5,10 @@ import java.util.ArrayList;
 /**
  * Takes care of all image loading so that required images are only loaded once from the file.
  * An ArrayList of AcceleratedImages is kept that holds all the information for loaded images.
- * This list is sorted lexicographically by the reference names so that searches by reference name are optimized for speed.
+ * This list may be sorted lexicographically by the reference names so that searches by reference name are optimized for speed.
+ * This will make indexes of items in the list unreliable, so it may not be acceptable.
  * Each loaded image has a reference name (used to get the image from the list), a filename (the location of the image on file), 
- *  an index (used for faster retrieval of the image), and an AcceleratedImage which holds all the contents of the image itself.
+ *  an index (used for faster retrieval of the image if the list is not ordered), and an AcceleratedImage which holds all the contents of the image itself.
  * When an image is known to be needed later, the add() methods should be used with whatever information is available.
  * To access an image, use the get() methods, preferably one that adds the image to the list if it has not been.
  * 
@@ -17,17 +18,22 @@ public class ImageLoader
 {
 	private ArrayList<LoadedImage> images;
 	
+	private boolean order;
+	
 	public static final int IMAGE = 1;
 	public static final int ACCELERATED_IMAGE = 2;
 	public static final int BUFFERED_IMAGE = 3;
 	
 	/**
-	 * Creates a new ImageLoader with the given Information.
+	 * Creates a new ImageLoader.
+	 * If the ImageLoader should order the entries by name, the boolean should be true.
+	 * This will mean that indexes will not be reliable, but it will lower the amount of time that it takes to search the list for a name.
 	 * 
-	 * @param info
+	 * @param order - true if the entries should be lexicographically ordered, false otherwise
 	 */
-	public ImageLoader()
+	public ImageLoader(boolean order)
 	{
+		this.order = order;
 		images = new ArrayList<LoadedImage>();
 	}
 	
@@ -231,27 +237,41 @@ public class ImageLoader
 	 */
 	public int getIndex(String referenceName)
 	{
-		int start = 0;
-		int end = images.size();
-		int mid = (start + end)/2;
-		while (start < end)
+		if (order)
 		{
-			mid = (start + end)/2;
-			int comparison = referenceName.compareTo(images.get(mid).getReferenceName());
-			if (comparison < 0)
+			int start = 0;
+			int end = images.size();
+			int mid = (start + end)/2;
+			while (start < end)
 			{
-				end = mid;
+				mid = (start + end)/2;
+				int comparison = referenceName.compareTo(images.get(mid).getReferenceName());
+				if (comparison < 0)
+				{
+					end = mid;
+				}
+				else if (comparison > 0)
+				{
+					start = mid + 1;
+				}
+				else
+				{
+					return mid;
+				}
 			}
-			else if (comparison > 0)
-			{
-				start = mid + 1;
-			}
-			else
-			{
-				return mid;
-			}
+			return -1;
 		}
-		return -1;
+		else
+		{
+			for (int i = 0; i < images.size(); i++)
+			{
+				if (referenceName.equalsIgnoreCase(images.get(i).getReferenceName()))
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
 	}
 	
 	/**
@@ -269,9 +289,12 @@ public class ImageLoader
 		for (int i = 0; i < images.size(); i++)
 		{
 			int comparison = referenceName.compareTo(images.get(i).getReferenceName());
-			if (comparison < 0)
+			if (order)
 			{
-				return i;
+				if (comparison < 0)
+				{
+					return i;
+				}
 			}
 			else if (comparison == 0)
 			{

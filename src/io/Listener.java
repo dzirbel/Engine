@@ -26,6 +26,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	
 	public static final int TYPE_KEY_PRESSED = KeyEvent.KEY_PRESSED;
 	public static final int TYPE_KEY_RELEASED = KeyEvent.KEY_RELEASED;
+	public static final int TYPE_MOUSE_DRAGGED = MouseEvent.MOUSE_DRAGGED;
 	public static final int TYPE_MOUSE_MOVED = MouseEvent.MOUSE_MOVED;
 	public static final int TYPE_MOUSE_PRESSED = MouseEvent.MOUSE_PRESSED;
 	public static final int TYPE_MOUSE_RELEASED = MouseEvent.MOUSE_RELEASED;
@@ -43,6 +44,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	private int key_pressed_start;
 	private int key_released_start;
 	private int mouse_moved_start;
+	private int mouse_dragged_start;
 	private int mouse_pressed_start;
 	private int mouse_released_start;
 	private int mouse_wheel_start;
@@ -64,6 +66,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 		mouse_released_start = 0;
 		mouse_wheel_start = 0;
 		mouse_moved_start = 0;
+		mouse_dragged_start = 0;
 	}
 	
 	/**
@@ -190,7 +193,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	 */
 	public void mouseMoved(MouseEvent event)
 	{
-		for (int i = mouse_moved_start; i < notifications.size(); i++)
+		for (int i = mouse_moved_start; i < mouse_dragged_start; i++)
 		{
 			notifications.get(i).call(event);
 		}
@@ -203,7 +206,11 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 	 */
 	public void mouseDragged(MouseEvent event) 
 	{
-		mouseMoved(event);
+		for (int i = mouse_dragged_start; i < notifications.size(); i++)
+		{
+			notifications.get(i).call(event);
+		}
+		event.consume();
 	}
 	
 	/**
@@ -278,6 +285,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 			mouse_released_start++;
 			mouse_wheel_start++;
 			mouse_moved_start++;
+			mouse_dragged_start++;
 		}
 		else if (type == TYPE_KEY_RELEASED)
 		{
@@ -285,21 +293,29 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 			mouse_released_start++;
 			mouse_wheel_start++;
 			mouse_moved_start++;
+			mouse_dragged_start++;
 		}
 		else if (type == TYPE_MOUSE_PRESSED)
 		{
 			mouse_released_start++;
 			mouse_wheel_start++;
 			mouse_moved_start++;
+			mouse_dragged_start++;
 		}
 		else if (type == TYPE_MOUSE_RELEASED)
 		{
 			mouse_wheel_start++;
 			mouse_moved_start++;
+			mouse_dragged_start++;
 		}
 		else if (type == TYPE_MOUSE_WHEEL)
 		{
 			mouse_moved_start++;
+			mouse_dragged_start++;
+		}
+		else if (type == TYPE_MOUSE_MOVED)
+		{
+			mouse_dragged_start++;
 		}
 	}
 	
@@ -327,6 +343,8 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 			return mouse_wheel_start;
 		case TYPE_MOUSE_MOVED:
 			return mouse_moved_start;
+		case TYPE_MOUSE_DRAGGED:
+			return mouse_dragged_start;
 		default:
 			return -1;
 		}

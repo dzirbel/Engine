@@ -28,6 +28,7 @@ public class NotificationRequest
 	
 	public static final int TYPE_KEY_PRESSED = Listener.TYPE_KEY_PRESSED;
 	public static final int TYPE_KEY_RELEASED = Listener.TYPE_KEY_RELEASED;
+	public static final int TYPE_MOUSE_DRAGGED = Listener.TYPE_MOUSE_DRAGGED;
 	public static final int TYPE_MOUSE_MOVED = Listener.TYPE_MOUSE_MOVED;
 	public static final int TYPE_MOUSE_PRESSED = Listener.TYPE_MOUSE_PRESSED;
 	public static final int TYPE_MOUSE_RELEASED = Listener.TYPE_MOUSE_RELEASED;
@@ -90,6 +91,7 @@ public class NotificationRequest
 			case TYPE_MOUSE_MOVED:
 			case TYPE_MOUSE_PRESSED:
 			case TYPE_MOUSE_RELEASED:
+			case TYPE_MOUSE_DRAGGED:
 				Class<?>[] mouseParameters = {MouseEvent.class};
 				method = object.getClass().getMethod(methodName, mouseParameters);
 				break;
@@ -164,9 +166,9 @@ public class NotificationRequest
 	 */
 	public boolean call(MouseEvent event)
 	{
-		if ((type == TYPE_MOUSE_MOVED || type == TYPE_MOUSE_PRESSED || type == TYPE_MOUSE_RELEASED) && working)
+		if ((type == TYPE_MOUSE_MOVED || type == TYPE_MOUSE_PRESSED || type == TYPE_MOUSE_RELEASED || type == TYPE_MOUSE_DRAGGED) && working)
 		{
-			if (code == event.getButton() || code == CODE_BUTTON_ALL || type == TYPE_MOUSE_MOVED)
+			if (code == event.getButton() || code == CODE_BUTTON_ALL || type == TYPE_MOUSE_MOVED || type == TYPE_MOUSE_DRAGGED)
 			{
 				try
 				{
@@ -188,6 +190,10 @@ public class NotificationRequest
 							"Thrown while trying to call this (discrete) method from a NotificationRequest.");
 				}
 				return true;
+			}
+			if (type == TYPE_MOUSE_DRAGGED)
+			{
+				System.out.println("~ " + code + " " + event.getButton());
 			}
 		}
 		return false;
