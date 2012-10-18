@@ -8,345 +8,694 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
+
 /**
- * This class listens for input events from the keyboard and mouse by implementing various interfaces from java.awt.event.
- * Other classes can receive a notification in the form of a method call by using the overloaded requestNotification() methods.
- * These methods will add a new NotificationRequest to the ArrayList, which is checked whenever a key is pressed or released.
- * A list of the starting indexes of the various notifications types is kept in order that notification can be quicker upon an event.
- * If the correct key was pressed/released, the specified method will be called.
+ * Creates a simple interface for input events from the keyboard and mouse through the
+ *  {@code java.awt.event} API.
+ * Classes can register for notifications on specific events; these notifications are sent as a 
+ *  method call to any method supported by the class.
  * 
- * @author Dominic
+ * @author zirbinator
  */
-public class Listener implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener
+public class Listener implements KeyListener, MouseMotionListener, MouseListener,
+        MouseWheelListener
 {
-	private ArrayList<NotificationRequest> notifications;
-	
-	public static final int TYPE_KEY_PRESSED = KeyEvent.KEY_PRESSED;
-	public static final int TYPE_KEY_RELEASED = KeyEvent.KEY_RELEASED;
-	public static final int TYPE_MOUSE_DRAGGED = MouseEvent.MOUSE_DRAGGED;
-	public static final int TYPE_MOUSE_MOVED = MouseEvent.MOUSE_MOVED;
-	public static final int TYPE_MOUSE_PRESSED = MouseEvent.MOUSE_PRESSED;
-	public static final int TYPE_MOUSE_RELEASED = MouseEvent.MOUSE_RELEASED;
-	public static final int TYPE_MOUSE_WHEEL = MouseEvent.MOUSE_WHEEL;
-	
-	public static final int CODE_BUTTON1 = MouseEvent.BUTTON1;
-	public static final int CODE_BUTTON2 = MouseEvent.BUTTON2;
-	public static final int CODE_BUTTON3 = MouseEvent.BUTTON3;
-	public static final int CODE_BUTTON_ALL = MouseEvent.NOBUTTON;
-	public static final int CODE_KEY_ALL = -2;
-	public static final int CODE_SCROLL_BOTH = 0;
-	public static final int CODE_SCROLL_DOWN = 1;
-	public static final int CODE_SCROLL_UP = -1;
-	
-	private int key_pressed_start;
-	private int key_released_start;
-	private int mouse_moved_start;
-	private int mouse_dragged_start;
-	private int mouse_pressed_start;
-	private int mouse_released_start;
-	private int mouse_wheel_start;
-	
-	private Point mouseLocation;
-	
-	/**
-	 * Creates a new Listener object with the given Information.
-	 * 
-	 * @param info - the universal Information
-	 */
-	public Listener()
-	{
-		mouseLocation = new Point();
-		notifications = new ArrayList<NotificationRequest>();
-		key_pressed_start = 0;
-		key_released_start = 0;
-		mouse_pressed_start = 0;
-		mouse_released_start = 0;
-		mouse_wheel_start = 0;
-		mouse_moved_start = 0;
-		mouse_dragged_start = 0;
-	}
-	
-	/**
-	 * Requests that a notification be sent via method call when a certain key is pressed or released.
-	 * The starting indexes for the various notification types in the notification list are shifted appropriately.
-	 * 
-	 * @param object - the object whose method is invoked as a notification
-	 * @param method - the method called upon notification
-	 * @param type - the type of of event that triggers this notification (use Listener for the corresponding ints)
-	 * @param code - the key, mouse button, or mouse wheel scroll direction (positive is down/negative is up) that triggers the notification
-	 * @param sendCode - whether the method call should use the code as the first parameter
-	 * @param sendType - whether the method call should use the type as the second parameter (first if the code is not send)
-	 */
-	public void requestNotification(Object object, Method method, int type, int code)
-	{
-		notifications.add(getStart(type), new NotificationRequest(object, method, type, code));
-		shiftStarts(type);
-	}
-	
-	/**
-	 * Requests that a notification be sent via method call when a certain key is pressed or released.
-	 * The starting indexes for the various notification types in the notification list are shifted appropriately.
-	 * 
-	 * @param object - the object whose method is invoked as a notification
-	 * @param methodName - the name of the method called upon notification
-	 * @param type - the type of of event that triggers this notification (use Listener for the corresponding ints)
-	 * @param code - the key, mouse button, or mouse wheel scroll direction (positive is down/negative is up) that triggers the notification
-	 * @param sendCode - whether the method call should use the code as the first parameter
-	 * @param sendType - whether the method call should use the type as the second parameter (first if the code is not send)
-	 */
-	public void requestNotification(Object object, String methodName, int type, int code)
-	{
-		notifications.add(getStart(type), new NotificationRequest(object, methodName, type, code));
-		shiftStarts(type);
-	}
-	
-	/**
-	 * Invoked when a key has been pressed.
-	 * Checks the registered notifications and sends a method call if a notification matches the event.
-	 */
-	public void keyPressed(KeyEvent event)
-	{
-		for (int i = key_pressed_start; i < key_released_start; i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when a key has been released.
-	 * Checks the registered notifications and sends a method call if a notification matches the event.
-	 */
-	public void keyReleased(KeyEvent event) 
-	{
-		for (int i = key_released_start; i < mouse_pressed_start; i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when a key has been typed.
-	 */
-	public void keyTyped(KeyEvent event) 
-	{
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when a mouse button has been pressed on a component.
-	 * Checks the registered notifications and sends a method call if a notification matches the event.
-	 */
-	public void mousePressed(MouseEvent event) 
-	{
-		for (int i = mouse_pressed_start; i < mouse_released_start; i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when a mouse button has been released on a component.
-	 * Checks the registered notifications and sends a method call if a notification matches the event.
-	 */
-	public void mouseReleased(MouseEvent event) 
-	{
-		for (int i = mouse_released_start; i < mouse_wheel_start; i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when the mouse button has been clicked (pressed and released) on a component.
-	 */
-	public void mouseClicked(MouseEvent event) 
-	{
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when the mouse enters a component.
-	 */
-	public void mouseEntered(MouseEvent event) 
-	{
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when the mouse exits a component.
-	 */
-	public void mouseExited(MouseEvent event) 
-	{
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when the mouse cursor has been moved onto a component but no buttons have been pushed.
-	 * Checks the registered notifications and sends a method call if a notification matches the event.
-	 */
-	public void mouseMoved(MouseEvent event)
-	{
-		for (int i = mouse_moved_start; i < mouse_dragged_start; i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when a mouse button is pressed on a component and then dragged.
-	 * Calls mouseMoved with the same MouseEvent given, which then checks for mouse movement notifications requests.
-	 */
-	public void mouseDragged(MouseEvent event) 
-	{
-		for (int i = mouse_dragged_start; i < notifications.size(); i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Invoked when the mouse wheel is rotated.
-	 * Checks the registered notifications and sends a method call if a notification matches the event.
-	 */
-	public void mouseWheelMoved(MouseWheelEvent event) 
-	{
-		for (int i = mouse_wheel_start; i < mouse_moved_start; i++)
-		{
-			notifications.get(i).call(event);
-		}
-		event.consume();
-	}
-	
-	/**
-	 * Returns the current position of the mouse on the screen, in pixels.
-	 * 
-	 * @return mouseLocation - the location of the mouse pointer
-	 */
-	public Point getMouseLocation()
-	{
-		return mouseLocation;
-	}
-	
-	/**
-	 * Determines whether the given mouse wheel rotation is up (away from the user).
-	 * The rotation can be found with a MouseWheelEvent's getWheelRotation() method or a NotificationRequest's code (if the type is MOUSE_WHEEL).
-	 * Note: if there was no rotation, false is returned, so use this method only to determine is the rotation is up - use isDown to determine if it is down
-	 * 
-	 * @param rotation - the amount rotated
-	 * @return up - true if the rotation was up (away from the user), false otherwise (note: if there was no rotation, false is returned)
-	 */
-	public static boolean isUp(int rotation)
-	{
-		if (rotation < 0)
-		{
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Determines whether the given mouse wheel rotation is down (toward the user).
-	 * The rotation can be found with a MouseWheelEvent's getWheelRotation() method or a NotificationRequest's code (if the type is MOUSE_WHEEL).
-	 * Note: if there was no rotation, false is returned, so use this method only to determine is the rotation is down - use isUp to determine if it is up
-	 * 
-	 * @param rotation - the amount rotated
-	 * @return down - true if the rotation was down (toward the user), false otherwise (note: if there was no rotation, false is returned)
-	 */
-	public static boolean isDown(int rotation)
-	{
-		if (rotation > 0)
-		{
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Shifts the indexes at which various types of notification requests begin.
-	 * The indexes are changed so that a notification request with the given type can be added in its correct position.
-	 * 
-	 * @param type - the type of notification request to be adjusted for
-	 */
-	private void shiftStarts(int type)
-	{
-		if (type == TYPE_KEY_PRESSED)
-		{
-			key_released_start++;
-			mouse_pressed_start++;
-			mouse_released_start++;
-			mouse_wheel_start++;
-			mouse_moved_start++;
-			mouse_dragged_start++;
-		}
-		else if (type == TYPE_KEY_RELEASED)
-		{
-			mouse_pressed_start++;
-			mouse_released_start++;
-			mouse_wheel_start++;
-			mouse_moved_start++;
-			mouse_dragged_start++;
-		}
-		else if (type == TYPE_MOUSE_PRESSED)
-		{
-			mouse_released_start++;
-			mouse_wheel_start++;
-			mouse_moved_start++;
-			mouse_dragged_start++;
-		}
-		else if (type == TYPE_MOUSE_RELEASED)
-		{
-			mouse_wheel_start++;
-			mouse_moved_start++;
-			mouse_dragged_start++;
-		}
-		else if (type == TYPE_MOUSE_WHEEL)
-		{
-			mouse_moved_start++;
-			mouse_dragged_start++;
-		}
-		else if (type == TYPE_MOUSE_MOVED)
-		{
-			mouse_dragged_start++;
-		}
-	}
-	
-	/**
-	 * Returns the starting index of the notification requests of the given type.
-	 * A new notification request of the given type should be added to this location.
-	 * Either before or after the notification request is added, a call to shiftStarts should be made.
-	 * 
-	 * @param type - the type of notification request to be added
-	 * @return start - the starting index for the given type, -1 is the type is not recognized
-	 */
-	private int getStart(int type)
-	{
-		switch(type)
-		{
-		case TYPE_KEY_PRESSED:
-			return key_pressed_start;
-		case TYPE_KEY_RELEASED:
-			return key_released_start;
-		case TYPE_MOUSE_PRESSED:
-			return mouse_pressed_start;
-		case TYPE_MOUSE_RELEASED:
-			return mouse_released_start;
-		case TYPE_MOUSE_WHEEL:
-			return mouse_wheel_start;
-		case TYPE_MOUSE_MOVED:
-			return mouse_moved_start;
-		case TYPE_MOUSE_DRAGGED:
-			return mouse_dragged_start;
-		default:
-			return -1;
-		}
-	}
+    private ArrayList<NotificationRequest> notifications;
+    
+    /**
+     * Corresponds to a key press, triggered when the user presses a key on the keyboard.
+     * Valid codes are {@link Listener#CODE_KEY_ALL} or any virtual keyboard code, accessible from
+     *  the {@link KeyEvent} class, i.e. {@link KeyEvent#VK_Q} for the "Q" key.
+     * 
+     * @see KeyEvent#KEY_PRESSED
+     */
+    public static final int TYPE_KEY_PRESSED = KeyEvent.KEY_PRESSED;
+    /**
+     * Corresponds to a key release, triggered when the user released a key on the keyboard.
+     * Valid codes are {@link Listener#CODE_KEY_ALL} or any virtual keyboard code, accessible from
+     *  the {@link KeyEvent} class, i.e. {@link KeyEvent#VK_Q} for the "Q" key.
+     * 
+     * @see KeyEvent#KEY_RELEASED
+     */
+    public static final int TYPE_KEY_RELEASED = KeyEvent.KEY_RELEASED;
+    /**
+     * Corresponds to the mouse being dragged, triggered when a mouse button is held and the mouse
+     *  is moved.
+     * No code need be provided for this type.
+     * 
+     * @see MouseEvent#MOUSE_DRAGGED
+     */
+    public static final int TYPE_MOUSE_DRAGGED = MouseEvent.MOUSE_DRAGGED;
+    /**
+     * Corresponds to the mouse being moved, triggered when no mouse buttons are held and the mouse
+     *  is moved.
+     * No code need be provided for this type.
+     * 
+     * @see MouseEvent#MOUSE_MOVED
+     */
+    public static final int TYPE_MOUSE_MOVED = MouseEvent.MOUSE_MOVED;
+    /**
+     * Corresponds to a mouse button being pressed, triggered when the button is pressed.
+     * Valid codes are {@link Listener#CODE_BUTTON1}, {@link Listener#CODE_BUTTON2},
+     *  {@link Listener#CODE_BUTTON3}, and {@link Listener#CODE_BUTTON_ALL}.
+     * 
+     * @see MouseEvent#MOUSE_PRESSED
+     */
+    public static final int TYPE_MOUSE_PRESSED = MouseEvent.MOUSE_PRESSED;
+    /**
+     * Corresponds to a mouse button being released, triggered when the button is released.
+     * Valid codes are {@link Listener#CODE_BUTTON1}, {@link Listener#CODE_BUTTON2},
+     *  {@link Listener#CODE_BUTTON3}, and {@link Listener#CODE_BUTTON_ALL}.
+     * 
+     * @see MouseEvent#MOUSE_RELEASED
+     */
+    public static final int TYPE_MOUSE_RELEASED = MouseEvent.MOUSE_RELEASED;
+    /**
+     * Corresponds to the mouse wheel being rotated, triggered when the wheel is moved.
+     * Valid codes are {@link Listener#CODE_SCROLL_UP}, {@link Listener#CODE_SCROLL_DOWN}, and
+     *  {@link Listener#CODE_SCROLL_BOTH}.
+     * 
+     * @see MouseEvent#MOUSE_WHEEL
+     */
+    public static final int TYPE_MOUSE_WHEEL = MouseEvent.MOUSE_WHEEL;
+    /**
+     * Filters mouse presses and releases to only Button 1 (typically the left button).
+     * This code is valid for types {@link Listener#TYPE_MOUSE_PRESSED} and 
+     *  {@link Listener#TYPE_MOUSE_RELEASED}.
+     * 
+     * @see MouseEvent#BUTTON1
+     */
+    public static final int CODE_BUTTON1 = MouseEvent.BUTTON1;
+    /**
+     * Filters mouse presses and releases to only Button 2 (typically the right button).
+     * This code is valid for types {@link Listener#TYPE_MOUSE_PRESSED} and 
+     *  {@link Listener#TYPE_MOUSE_RELEASED}.
+     * 
+     * @see MouseEvent#BUTTON2
+     */
+    public static final int CODE_BUTTON2 = MouseEvent.BUTTON2;
+    /**
+     * Filters mouse presses and releases to only Button 3 (typically the wheel "button").
+     * This code is valid for types {@link Listener#TYPE_MOUSE_PRESSED} and 
+     *  {@link Listener#TYPE_MOUSE_RELEASED}.
+     * 
+     * @see MouseEvent#BUTTON3
+     */
+    public static final int CODE_BUTTON3 = MouseEvent.BUTTON3;
+    /**
+     * Filters the mouse presses and releases to all buttons.
+     * This code is valid for types {@link Listener#TYPE_MOUSE_PRESSED} and 
+     *  {@link Listener#TYPE_MOUSE_RELEASED}.
+     * 
+     * @see MouseEvent#NOBUTTON
+     */
+    public static final int CODE_BUTTON_ALL = MouseEvent.NOBUTTON;
+    /**
+     * Filters key presses and releases to all the keys.
+     * This code is valid for types {@link Listener#TYPE_KEY_PRESSED} and
+     *  {@link Listener#TYPE_KEY_RELEASED}.
+     */
+    public static final int CODE_KEY_ALL = -2;
+    /**
+     * Filters mouse wheel scrolls to both up and down scrolls.
+     * This code is valid for the type {@link Listener#TYPE_MOUSE_WHEEL}.
+     */
+    public static final int CODE_SCROLL_BOTH = 0;
+    /**
+     * Filters mouse wheel scrolls to only down scrolls (toward the user).
+     * This code is valid for the type {@link Listener#TYPE_MOUSE_WHEEL}.
+     */
+    public static final int CODE_SCROLL_DOWN = 1;
+    /**
+     * Filters mouse wheel scrolls to only down scrolls (away from the user).
+     * This code is valid for the type {@link Listener#TYPE_MOUSE_WHEEL}.
+     */
+    public static final int CODE_SCROLL_UP = -1;
+    private int key_pressed_start;
+    private int key_released_start;
+    private int mouse_moved_start;
+    private int mouse_dragged_start;
+    private int mouse_pressed_start;
+    private int mouse_released_start;
+    private int mouse_wheel_start;
+    
+    private Point mouseLocation;
+    
+    /**
+     * Creates a new Listener.
+     * This Listener does not automatically listen to any source of events, as such it must be
+     *  added to such source (for example with {@link JFrame#addKeyListener(KeyListener)}).
+     */
+    public Listener()
+    {
+        mouseLocation = new Point();
+        notifications = new ArrayList<NotificationRequest>();
+        key_pressed_start = 0;
+        key_released_start = 0;
+        mouse_pressed_start = 0;
+        mouse_released_start = 0;
+        mouse_wheel_start = 0;
+        mouse_moved_start = 0;
+        mouse_dragged_start = 0;
+    }
+    
+    /**
+     * Creates a new Listener.
+     * This Listener automatically listens for events from all of the given {@link JFrame}s, it is
+     *  unnecessary to add it as a listener to them (for example with 
+     *  {@link JFrame#addKeyListener(KeyListener)}).
+     * 
+     * @param sources - the sources from which this Listener should get events
+     */
+    public Listener(JFrame... sources)
+    {
+        this();
+        
+        for(int i = 0; i < sources.length; i++)
+        {
+            sources[i].addKeyListener(this);
+            sources[i].addMouseListener(this);
+            sources[i].addMouseMotionListener(this);
+            sources[i].addMouseWheelListener(this);
+        }
+    }
+    
+    /**
+     * Requests that the given Object's given Method be invoked when an event of the given type
+     *  with the given code specification occurs.
+     * The method invoked can have as many or few parameters, but null will be passed as all of the
+     *  arguments, unless the method has a single parameter with the type of the event related to
+     *  the type.
+     * For example, if a notification were requested for the type {@link #TYPE_KEY_PRESSED} and the
+     *  method given had a single parameter, a {@link KeyEvent}, the {@link KeyEvent} which
+     *  triggered the notification would be passed to the method.
+     * 
+     * @param object - the Object whose method should be called as a notification, may be null if
+     *  the method is static
+     * @param method - the Method to be invoked upon an associated event, should not be null
+     * @param type - the type of event that triggers this notification (i.e. 
+     *  {@link #TYPE_KEY_PRESSED})
+     * @param code - the kind of data that an event of the given type must be for a notification to
+     *  be sent (i.e. {@link Listener#CODE_BUTTON1})
+     */
+    public void requestNotification(Object object, Method method, int type, int code)
+    {
+        notifications.add(getStart(type), new NotificationRequest(object, method, type, code));
+        shiftStarts(type);
+    }
+    
+    /**
+     * Requests that the given Object's given Method be invoked when an event of the given type
+     *  occurs.
+     * There is as little restriction on the data of the event as possible, that is, every event
+     *  of the given type will trigger a notification.
+     * The method invoked can have as many or few parameters, but null will be passed as all of the
+     *  arguments, unless the method has a single parameter with the type of the event related to
+     *  the type.
+     * For example, if a notification were requested for the type {@link #TYPE_KEY_PRESSED} and the
+     *  method given had a single parameter, a {@link KeyEvent}, the {@link KeyEvent} which
+     *  triggered the notification would be passed to the method.
+     * 
+     * @param object - the Object whose method should be called as a notification, may be null if
+     *  the method is static
+     * @param method - the Method to be invoked upon an associated event, should not be null
+     * @param type - the type of event that triggers this notification (i.e. 
+     *  {@link #TYPE_KEY_PRESSED})
+     */
+    public void requestNotification(Object object, Method method, int type)
+    {
+        notifications.add(getStart(type), new NotificationRequest(object, method, type, 
+                getCode(type)));
+        shiftStarts(type);
+    }
+    
+    /**
+     * Requests that the given Object's given Method be invoked when an event of the given type
+     *  with the given code specification occurs.
+     * The method invoked can have as many or few parameters, but null will be passed as all of the
+     *  arguments, unless the method has a single parameter with the type of the event related to
+     *  the type.
+     * For example, if a notification were requested for the type {@link #TYPE_KEY_PRESSED} and the
+     *  method given had a single parameter, a {@link KeyEvent}, the {@link KeyEvent} which
+     *  triggered the notification would be passed to the method.
+     * 
+     * @param object - the Object whose method should be called as a notification, may be null if
+     *  the method is static
+     * @param methodName - the name of the method to be invoked upon an associated event (note:
+     *  prioritized by parameters, if a method with the given name has a single event parameter as
+     *  described above, it will be used, otherwise a method will no parameters that also matches
+     *  the name will be used, otherwise notifications will not be sent)
+     * @param type - the type of event that triggers this notification (i.e. 
+     *  {@link #TYPE_KEY_PRESSED})
+     * @param code - the kind of data that an event of the given type must be for a notification to
+     *  be sent (i.e. {@link Listener#CODE_BUTTON1})
+     */
+    public void requestNotification(Object object, String methodName, int type, int code)
+    {
+        try
+        {
+            notifications.add(getStart(type), new NotificationRequest(object, methodName, type,
+                    code));
+        }
+        catch (NoSuchMethodException ex)
+        {
+            ex.printStackTrace();
+        }
+        shiftStarts(type);
+    }
+    
+    /**
+     * Requests that the given Object's given Method be invoked when an event of the given type
+     *  with the given code specification occurs.
+     * There is as little restriction on the data of the event as possible, that is, every event
+     *  of the given type will trigger a notification.
+     * The method invoked can have as many or few parameters, but null will be passed as all of the
+     *  arguments, unless the method has a single parameter with the type of the event related to
+     *  the type.
+     * For example, if a notification were requested for the type {@link #TYPE_KEY_PRESSED} and the
+     *  method given had a single parameter, a {@link KeyEvent}, the {@link KeyEvent} which
+     *  triggered the notification would be passed to the method.
+     * 
+     * @param object - the Object whose method should be called as a notification, may be null if
+     *  the method is static
+     * @param methodName - the name of the method to be invoked upon an associated event (note:
+     *  prioritized by parameters, if a method with the given name has a single event parameter as
+     *  described above, it will be used, otherwise a method will no parameters that also matches
+     *  the name will be used, otherwise notifications will not be sent)
+     * @param type - the type of event that triggers this notification (i.e. 
+     *  {@link #TYPE_KEY_PRESSED})
+     * @param code - the kind of data that an event of the given type must be for a notification to
+     *  be sent (i.e. {@link Listener#CODE_BUTTON1})
+     */
+    public void requestNotification(Object object, String methodName, int type)
+    {
+        try
+        {
+            notifications.add(getStart(type), new NotificationRequest(object, methodName, type, 
+                    getCode(type)));
+        }
+        catch (NoSuchMethodException ex)
+        {
+            ex.printStackTrace();
+        }
+        shiftStarts(type);
+    }
+    
+    /**
+     * Gets the most general code that is able to be applied to the given type.
+     * That is, if the given type is {@link #TYPE_KEY_PRESSED} or  {@link #TYPE_KEY_RELEASED}, 
+     *  {@link #CODE_KEY_ALL} is returned so that events involving any key are caught; if the given
+     *  type is {@link #TYPE_MOUSE_WHEEL}, {@link #CODE_SCROLL_BOTH} is returned so that both
+     *  upward and downward scrolls are caught; and if the given type is
+     *  {@link #TYPE_MOUSE_PRESSED} or  {@link #TYPE_MOUSE_RELEASED}, {@link #CODE_BUTTON_ALL} is
+     *  returned so that events on any buttons are caught.
+     * Otherwise, {@code -1} is returned.
+     * 
+     * @param type - the type for which a code should be gotten
+     * @return the most inclusive code possible for the given type, or {@code -1}
+     */
+    private static int getCode(int type)
+    {
+        if (type == Listener.TYPE_KEY_PRESSED || type == Listener.TYPE_KEY_RELEASED)
+        {
+            return Listener.CODE_KEY_ALL;
+        }
+        else if (type == Listener.TYPE_MOUSE_WHEEL)
+        {
+            return Listener.CODE_SCROLL_BOTH;
+        }
+        else if (type == Listener.TYPE_MOUSE_PRESSED || type == Listener.TYPE_MOUSE_RELEASED)
+        {
+            return Listener.CODE_BUTTON_ALL;
+        }
+        
+        return -1;
+    }
+    
+    /**
+     * Invoked when a key is pressed.
+     * Sends out relevant notifications based on the event.
+     */
+    public void keyPressed(KeyEvent event)
+    {
+        for (int i = key_pressed_start; i < key_released_start; i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Invoked when a key is released.
+     * Sends out relevant notifications based on the event.
+     */
+    public void keyReleased(KeyEvent event)
+    {
+        for (int i = key_released_start; i < mouse_pressed_start; i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Invoked when a key is typed.
+     */
+    public void keyTyped(KeyEvent event)
+    {
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse is pressed over a component.
+     * Sends out relevant notifications based on the event.
+     */
+    public void mousePressed(MouseEvent event)
+    {
+        for (int i = mouse_pressed_start; i < mouse_released_start; i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse is released over a component.
+     * Sends out relevant notifications based on the event.
+     */
+    public void mouseReleased(MouseEvent event)
+    {
+        for (int i = mouse_released_start; i < mouse_wheel_start; i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse button has been clicked (pressed and released) on a component.
+     */
+    public void mouseClicked(MouseEvent event)
+    {
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse enters a component.
+     */
+    public void mouseEntered(MouseEvent event)
+    {
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse exits a component.
+     */
+    public void mouseExited(MouseEvent event)
+    {
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse is moved over a component and no buttons are held.
+     * Sends out relevant notifications based on the event.
+     */
+    public void mouseMoved(MouseEvent event)
+    {
+        for (int i = mouse_moved_start; i < mouse_dragged_start; i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse is moved over a component while one of the buttons is held.
+     * Sends out relevant notifications based on the event.
+     */
+    public void mouseDragged(MouseEvent event)
+    {
+        for (int i = mouse_dragged_start; i < notifications.size(); i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Invoked when the mouse wheel is rotated.
+     * Sends out relevant notifications based on the event.
+     */
+    public void mouseWheelMoved(MouseWheelEvent event)
+    {
+        for (int i = mouse_wheel_start; i < mouse_moved_start; i++)
+        {
+            try
+            {
+                notifications.get(i).call(event);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (IllegalAccessException ex)
+            {
+                ex.printStackTrace();
+            }
+            catch (InvocationTargetException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+        event.consume();
+    }
+    
+    /**
+     * Returns the current position of the mouse on the screen, in pixels.
+     * The x-coordinate of the returned point is the cursor's distance from the left side of the
+     *  screen, the y-coordinate of the point is the cursor's distance from the top of the screen.
+     * 
+     * @return the location of the mouse pointer
+     */
+    public Point getMouseLocation()
+    {
+        return mouseLocation;
+    }
+    
+    /**
+     * Determines whether the given mouse wheel rotation is up (away from the user).
+     * The rotation can be found with a {@link MouseWheelEvent#getWheelRotation()}.
+     * Note: if there was no rotation, false is returned, so use this method only to determine is
+     *  the rotation is up - use {@link #isDown(int)} to determine if it is down.
+     * 
+     * @param rotation - the amount rotated
+     * @return true if the rotation was up (away from the user), false otherwise
+     * @see #isDown(int)
+     */
+    public static boolean isUp(int rotation)
+    {
+        if (rotation < 0)
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Determines whether the given mouse wheel rotation is down (toward the user).
+     * The rotation can be found with a {@link MouseWheelEvent#getWheelRotation()}.
+     * Note: if there was no rotation, false is returned, so use this method only to determine is
+     *  the rotation is down - use {@link #isUp(int)} to determine if it is up.
+     * 
+     * @param rotation - the amount rotated
+     * @return true if the rotation was down (toward the user), false otherwise
+     * @see #isUp(int)
+     */
+    public static boolean isDown(int rotation)
+    {
+        if (rotation > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Shifts the indexes at which various types of notification requests begin.
+     * The indexes are changed so that a notification request with the given type can be added in
+     *  its correct position.
+     * 
+     * @param type - the type of notification request to be adjusted for
+     * @see #getStart(int)
+     */
+    private void shiftStarts(int type)
+    {
+        if (type == TYPE_KEY_PRESSED)
+        {
+            key_released_start++;
+            mouse_pressed_start++;
+            mouse_released_start++;
+            mouse_wheel_start++;
+            mouse_moved_start++;
+            mouse_dragged_start++;
+        }
+        else if (type == TYPE_KEY_RELEASED)
+        {
+            mouse_pressed_start++;
+            mouse_released_start++;
+            mouse_wheel_start++;
+            mouse_moved_start++;
+            mouse_dragged_start++;
+        }
+        else if (type == TYPE_MOUSE_PRESSED)
+        {
+            mouse_released_start++;
+            mouse_wheel_start++;
+            mouse_moved_start++;
+            mouse_dragged_start++;
+        }
+        else if (type == TYPE_MOUSE_RELEASED)
+        {
+            mouse_wheel_start++;
+            mouse_moved_start++;
+            mouse_dragged_start++;
+        }
+        else if (type == TYPE_MOUSE_WHEEL)
+        {
+            mouse_moved_start++;
+            mouse_dragged_start++;
+        }
+        else if (type == TYPE_MOUSE_MOVED)
+        {
+            mouse_dragged_start++;
+        }
+    }
+    
+    /**
+     * Returns the starting index of the notification requests of the given type.
+     * A new notification request of the given type should be added to this location.
+     * Either before or after the notification request is added, a call to 
+     *  {@link #shiftStarts(int)} should be made.
+     * 
+     * @param type - the type of notification request to be added
+     * @return the starting index for the given type, -1 is the type is not recognized
+     * @see #shiftStarts(int)
+     */
+    private int getStart(int type)
+    {
+        switch (type)
+        {
+        case TYPE_KEY_PRESSED:
+            return key_pressed_start;
+        case TYPE_KEY_RELEASED:
+            return key_released_start;
+        case TYPE_MOUSE_PRESSED:
+            return mouse_pressed_start;
+        case TYPE_MOUSE_RELEASED:
+            return mouse_released_start;
+        case TYPE_MOUSE_WHEEL:
+            return mouse_wheel_start;
+        case TYPE_MOUSE_MOVED:
+            return mouse_moved_start;
+        case TYPE_MOUSE_DRAGGED:
+            return mouse_dragged_start;
+        default:
+            return -1;
+        }
+    }
 }
