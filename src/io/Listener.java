@@ -144,7 +144,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
     private int mouse_released_start;
     private int mouse_wheel_start;
     
-    private Point mouseLocation;
+    private static Point mouseLocation = new Point();
     
     /**
      * Creates a new Listener.
@@ -153,7 +153,6 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      */
     public Listener()
     {
-        mouseLocation = new Point();
         notifications = new ArrayList<NotificationRequest>();
         key_pressed_start = 0;
         key_released_start = 0;
@@ -487,6 +486,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      */
     public void mouseMoved(MouseEvent event)
     {
+        mouseLocation = event.getLocationOnScreen();
         for (int i = mouse_moved_start; i < mouse_dragged_start; i++)
         {
             try
@@ -515,6 +515,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      */
     public void mouseDragged(MouseEvent event)
     {
+        mouseLocation = event.getLocationOnScreen();
         for (int i = mouse_dragged_start; i < notifications.size(); i++)
         {
             try
@@ -572,7 +573,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * 
      * @return the location of the mouse pointer
      */
-    public Point getMouseLocation()
+    public static Point getMouseLocation()
     {
         return mouseLocation;
     }

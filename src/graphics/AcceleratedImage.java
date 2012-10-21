@@ -36,6 +36,11 @@ public class AcceleratedImage extends Image
      */
     private BufferedImage bi;
     
+    /**
+     * The transparency used to draw the volatile buffer.
+     */
+    private float transparency;
+    
     private int quality;
     /**
      * Opaque quality: all pixels are drawn over by the image, no transparency is allowed.
@@ -84,6 +89,7 @@ public class AcceleratedImage extends Image
             throw new IllegalArgumentException("Illegal quality: " + quality);
         }
         transform = new AffineTransform();
+        transparency = 1;
         vi = null;
     }
     
@@ -100,6 +106,7 @@ public class AcceleratedImage extends Image
         this.bi = bi;
         quality = bi.getTransparency();
         transform = new AffineTransform();
+        transparency = 1;
         vi = null;
     }
     
@@ -115,6 +122,7 @@ public class AcceleratedImage extends Image
     {
         loadImage(filename, quality);
         transform = new AffineTransform();
+        transparency = 1;
         vi = null;
     }
     
@@ -129,12 +137,14 @@ public class AcceleratedImage extends Image
     {
         loadImage(filename, -1);
         transform = new AffineTransform();
+        transparency = 1;
         vi = null;
     }
     
     /**
      * Loads the given image found at the filename into the contents of this AcccelerateImage,
      *  along with the given quality.
+     * The current transform and transparency are reset to the identity matrix and 1.0.
      * 
      * @param filename - the location of the contents of this AccelerateImage
      * @param quality - the quality: {@link #OPAQUE}, {@link #BITMASK}, {@link #TRANSLUCENT}, or
@@ -145,6 +155,8 @@ public class AcceleratedImage extends Image
     public void loadImage(String filename, int quality) throws IOException
     {
         bi = ImageIO.read(new File(filename));
+        transform = new AffineTransform();
+        transparency = 1;
         if (quality == -1)
         {
             this.quality = bi.getTransparency();
@@ -352,6 +364,37 @@ public class AcceleratedImage extends Image
     }
     
     /**
+     * Gets the transparency with which this AcceleratedImage is currently drawing.
+     * The returned transparency is between 0.0 and 1.0, where 0.0 is completely transparent and
+     *  1.0 is completely opaque.
+     * 
+     * @return the transparency used to draw the volatile buffer
+     */
+    public float getTransparency()
+    {
+        return transparency;
+    }
+    
+    /**
+     * Sets the transparency with which this AcceleratedImage should draw.
+     * The transparency is set immediately, but the buffer is redrawn on the next call to
+     *  {@link #draw(int, int, Graphics2D)} or {@link #validate(Graphics2D)} (if the given
+     *  transparency is different than the current one, otherwise nothing happens).
+     * Thus, if it is important that the draw times are consistent, a call to
+     *  {@link #validate(Graphics2D)} should be made before the next draw.
+     * 
+     * @param transparency - the transparency with which to draw, between 0 and 1
+     */
+    public void setTransparency(float transparency)
+    {
+        if (this.transparency != transparency)
+        {
+            this.transparency = Math.max(0, Math.min(1, transparency));
+            vi = null;
+        }
+    }
+    
+    /**
      * Draws the contents of this AcceleratedImage as quickly as possible.
      * First, the volatile buffer is checked and created if needed.
      * Then, until the volatile buffer retains its contents, it is drawn onto the given Graphics
@@ -364,6 +407,7 @@ public class AcceleratedImage extends Image
     public void draw(int x, int y, Graphics2D g)
     {
         GraphicsConfiguration config = g.getDeviceConfiguration();
+        
         if (vi == null)
         {
             vi = config.createCompatibleVolatileImage(bi.getWidth(), bi.getHeight(), quality);
@@ -382,10 +426,13 @@ public class AcceleratedImage extends Image
                 drawToVolatileImage(config);
             }
             
-            AffineTransform prev = g.getTransform();
-            g.transform(transform);
-            g.drawImage(vi, x, y, null);
-            g.setTransform(prev);
+            if (transparency != 0)
+            {
+                AffineTransform prev = g.getTransform();
+                g.transform(transform);
+                g.drawImage(vi, x, y, null);
+                g.setTransform(prev);
+            }
         } while (vi.contentsLost());
     }
     
@@ -430,10 +477,15 @@ public class AcceleratedImage extends Image
             {
                 vi = config.createCompatibleVolatileImage(bi.getWidth(), bi.getHeight(), quality);
             }
-            Graphics2D viGraphics = vi.createGraphics();
-            viGraphics.setComposite(AlphaComposite.Src);
-            viGraphics.drawImage(bi, 0, 0, null);
-            viGraphics.dispose();
+            
+            if (transparency != 0)
+            {
+                Graphics2D viGraphics = vi.createGraphics();
+                viGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC,
+                        transparency));
+                viGraphics.drawImage(bi, 0, 0, null);
+                viGraphics.dispose();
+            }
         } while (vi.contentsLost());
     }
 }
