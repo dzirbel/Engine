@@ -1,5 +1,11 @@
-Utility classes used in most projects are included here for simplicity and utility.
+A collection of general-purpose, utility classes and functions written in Java created by zirbinator [Dominic Zirbel, zirbinator@gmail.com].
 
-Classes are meant to be simple, useful, decoupled, and easy to use.
+These classes are intended primarily as a convenience for graphics-intensive Java applications such as games or graphics-oriented programs. Currently only two dimensional applications (image loading and rendering) are supported.
 
-Created by zirbinator
+The Engine currently supports:<ul>
+<li>Fast 2D image loading and drawing</li>
+<li>High-level mouse and keyboard input handling</li>
+<li>Customizeable tooltips</li>
+</ul>
+
+This software is open-source and free to use under the GNU General Public License, Version 3 (http://www.gnu.org/licenses/gpl.html).
