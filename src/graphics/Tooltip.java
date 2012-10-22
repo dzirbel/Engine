@@ -163,8 +163,7 @@ public class Tooltip implements Runnable
                     hoverTime = System.nanoTime();
                     visibility = Visibility.FADING_OUT;
                 }
-                else if (visibility == Visibility.INVISIBLE && 
-                        System.nanoTime() - hoverTime >= theme.delay*1000000)
+                else if (visibility == Visibility.INVISIBLE && System.nanoTime() - hoverTime >= theme.delay * 1000000)
                 {
                     hoverTime = System.nanoTime();
                     visibility = Visibility.FADING_IN;
@@ -183,7 +182,7 @@ public class Tooltip implements Runnable
             
             if (visibility == Visibility.FADING_IN)
             {
-                alpha += ((System.nanoTime() - lastUpdate)/1000000f)/theme.fadeInTime;
+                alpha += (System.nanoTime() - lastUpdate) / 1000000f / theme.fadeInTime;
                 if (alpha >= 1)
                 {
                     alpha = 1;
@@ -192,7 +191,7 @@ public class Tooltip implements Runnable
             }
             else if (visibility == Visibility.FADING_OUT)
             {
-                alpha -= ((System.nanoTime() - lastUpdate)/1000000f)/theme.fadeOutTime;
+                alpha -= (System.nanoTime() - lastUpdate) / 1000000f / theme.fadeOutTime;
                 if (alpha <= 0)
                 {
                     alpha = 0;
@@ -227,10 +226,8 @@ public class Tooltip implements Runnable
         FontMetrics metrics = context.getFontMetrics(theme.font);
         Rectangle2D stringBounds = metrics.getStringBounds(text, context);
         
-        BufferedImage bi = new BufferedImage(
-                (int)Math.ceil(stringBounds.getWidth() + 2*theme.textBuffer),
-                (int)Math.ceil(stringBounds.getHeight() + 2*theme.textBuffer),
-                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bi = new BufferedImage((int) Math.ceil(stringBounds.getWidth() + 2 * theme.textBuffer),
+                (int) Math.ceil(stringBounds.getHeight() + 2 * theme.textBuffer), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = (Graphics2D) bi.getGraphics();
         
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -241,11 +238,9 @@ public class Tooltip implements Runnable
         
         g.setFont(theme.font);
         g.setColor(theme.shadow);
-        g.drawString(text, theme.textBuffer + 1.25f,
-                (float)(theme.textBuffer/2d + stringBounds.getHeight() + 1.25));
+        g.drawString(text, theme.textBuffer + 1.25f, (float) (theme.textBuffer / 2d + stringBounds.getHeight() + 1.25));
         g.setColor(theme.text);
-        g.drawString(text, theme.textBuffer,
-                (float)(theme.textBuffer/2d + stringBounds.getHeight()));
+        g.drawString(text, theme.textBuffer, (float) (theme.textBuffer / 2d + stringBounds.getHeight()));
         
         image = new AcceleratedImage(bi, AcceleratedImage.TRANSLUCENT);
     }

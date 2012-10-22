@@ -1,5 +1,6 @@
 package io;
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -12,8 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
-
 /**
  * Creates a simple interface for input events from the keyboard and mouse through the
  *  {@code java.awt.event} API.
@@ -22,10 +21,9 @@ import javax.swing.JFrame;
  * 
  * @author zirbinator
  */
-public class Listener implements KeyListener, MouseMotionListener, MouseListener,
-        MouseWheelListener
+public class Listener implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener
 {
-    private ArrayList<NotificationRequest> notifications;
+    private static ArrayList<NotificationRequest> notifications = new ArrayList<NotificationRequest>();
     
     /**
      * Corresponds to a key press, triggered when the user presses a key on the keyboard.
@@ -136,51 +134,33 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * This code is valid for the type {@link Listener#TYPE_MOUSE_WHEEL}.
      */
     public static final int CODE_SCROLL_UP = -1;
-    private int key_pressed_start;
-    private int key_released_start;
-    private int mouse_moved_start;
-    private int mouse_dragged_start;
-    private int mouse_pressed_start;
-    private int mouse_released_start;
-    private int mouse_wheel_start;
+    private static int key_pressed_start = 0;
+    private static int key_released_start = 0;
+    private static int mouse_moved_start = 0;
+    private static int mouse_dragged_start = 0;
+    private static int mouse_pressed_start = 0;
+    private static int mouse_released_start = 0;
+    private static int mouse_wheel_start = 0;
+    
+    private static Listener listener = new Listener();
     
     private static Point mouseLocation = new Point();
     
     /**
-     * Creates a new Listener.
-     * This Listener does not automatically listen to any source of events, as such it must be
-     *  added to such source (for example with {@link JFrame#addKeyListener(KeyListener)}).
-     */
-    public Listener()
-    {
-        notifications = new ArrayList<NotificationRequest>();
-        key_pressed_start = 0;
-        key_released_start = 0;
-        mouse_pressed_start = 0;
-        mouse_released_start = 0;
-        mouse_wheel_start = 0;
-        mouse_moved_start = 0;
-        mouse_dragged_start = 0;
-    }
-    
-    /**
-     * Creates a new Listener.
-     * This Listener automatically listens for events from all of the given {@link JFrame}s, it is
-     *  unnecessary to add it as a listener to them (for example with 
-     *  {@link JFrame#addKeyListener(KeyListener)}).
+     * Initializes the Listener for the given sources of mouse and keyboard events.
+     * This is equivalent to adding a new Listener as a mouse listener, mouse motion listener,
+     *  mouse wheel listener, and key listener for each of the given sources.
      * 
-     * @param sources - the sources from which this Listener should get events
+     * @param sources - the potential sources of input from the user
      */
-    public Listener(JFrame... sources)
+    public static void init(Component... sources)
     {
-        this();
-        
-        for(int i = 0; i < sources.length; i++)
+        for (int i = 0; i < sources.length; i++)
         {
-            sources[i].addKeyListener(this);
-            sources[i].addMouseListener(this);
-            sources[i].addMouseMotionListener(this);
-            sources[i].addMouseWheelListener(this);
+            sources[i].addMouseListener(listener);
+            sources[i].addMouseMotionListener(listener);
+            sources[i].addMouseWheelListener(listener);
+            sources[i].addKeyListener(listener);
         }
     }
     
@@ -202,7 +182,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * @param code - the kind of data that an event of the given type must be for a notification to
      *  be sent (i.e. {@link Listener#CODE_BUTTON1})
      */
-    public void requestNotification(Object object, Method method, int type, int code)
+    public static void requestNotification(Object object, Method method, int type, int code)
     {
         notifications.add(getStart(type), new NotificationRequest(object, method, type, code));
         shiftStarts(type);
@@ -226,10 +206,9 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * @param type - the type of event that triggers this notification (i.e. 
      *  {@link #TYPE_KEY_PRESSED})
      */
-    public void requestNotification(Object object, Method method, int type)
+    public static void requestNotification(Object object, Method method, int type)
     {
-        notifications.add(getStart(type), new NotificationRequest(object, method, type, 
-                getCode(type)));
+        notifications.add(getStart(type), new NotificationRequest(object, method, type, getCode(type)));
         shiftStarts(type);
     }
     
@@ -254,12 +233,11 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * @param code - the kind of data that an event of the given type must be for a notification to
      *  be sent (i.e. {@link Listener#CODE_BUTTON1})
      */
-    public void requestNotification(Object object, String methodName, int type, int code)
+    public static void requestNotification(Object object, String methodName, int type, int code)
     {
         try
         {
-            notifications.add(getStart(type), new NotificationRequest(object, methodName, type,
-                    code));
+            notifications.add(getStart(type), new NotificationRequest(object, methodName, type, code));
         }
         catch (NoSuchMethodException ex)
         {
@@ -291,12 +269,11 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * @param code - the kind of data that an event of the given type must be for a notification to
      *  be sent (i.e. {@link Listener#CODE_BUTTON1})
      */
-    public void requestNotification(Object object, String methodName, int type)
+    public static void requestNotification(Object object, String methodName, int type)
     {
         try
         {
-            notifications.add(getStart(type), new NotificationRequest(object, methodName, type, 
-                    getCode(type)));
+            notifications.add(getStart(type), new NotificationRequest(object, methodName, type, getCode(type)));
         }
         catch (NoSuchMethodException ex)
         {
@@ -624,7 +601,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * @param type - the type of notification request to be adjusted for
      * @see #getStart(int)
      */
-    private void shiftStarts(int type)
+    private static void shiftStarts(int type)
     {
         if (type == TYPE_KEY_PRESSED)
         {
@@ -677,7 +654,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * @return the starting index for the given type, -1 is the type is not recognized
      * @see #shiftStarts(int)
      */
-    private int getStart(int type)
+    private static int getStart(int type)
     {
         switch (type)
         {

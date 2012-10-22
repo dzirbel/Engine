@@ -448,15 +448,24 @@ public class AcceleratedImage extends Image
         GraphicsConfiguration config = g.getDeviceConfiguration();
         do
         {
-            int code = vi.validate(config);
-            if (code == VolatileImage.IMAGE_RESTORED)
-            {
-                drawToVolatileImage(config);
-            }
-            else if (code == VolatileImage.IMAGE_INCOMPATIBLE)
+            if (vi == null)
             {
                 vi = config.createCompatibleVolatileImage(bi.getWidth(), bi.getHeight(), quality);
                 drawToVolatileImage(config);
+            }
+            else
+            {
+                int code = vi.validate(config);
+                if (code == VolatileImage.IMAGE_RESTORED)
+                {
+                    drawToVolatileImage(config);
+                }
+                else if (code == VolatileImage.IMAGE_INCOMPATIBLE)
+                {
+                    vi = config.createCompatibleVolatileImage(bi.getWidth(), bi.getHeight(),
+                            quality);
+                    drawToVolatileImage(config);
+                }
             }
         } while (vi.contentsLost());
     }
