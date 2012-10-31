@@ -51,20 +51,18 @@ public class ListUtil
         {
             mid = (low + high) / 2;
             int comparison = list.get(mid).compareTo(element);
-            if (comparison > 0)        // mid > element
+            if (comparison > 0)         // mid > element
             {
                 high = mid - 1;
             }
-            else if (comparison < 0)   // mid < element
+            else if (comparison < 0)    // mid < element
             {
                 low = mid + 1;
             }
-            else
-            // mid = element
+            else                        // mid = element
             {
                 return mid;
             }
-            
         }
         
         return -1;
@@ -246,6 +244,11 @@ public class ListUtil
      */
     public static <T extends Comparable<T>> void sort(List<T> list, int left, int right)
     {
+        if (list.size() < 2)
+        {
+            return;
+        }
+        
         int index = partition(list, left, right);
         if (left < index - 1)
         {

@@ -94,6 +94,25 @@ public class AcceleratedImage extends Image
     }
     
     /**
+     * Creates a new AcceleratedImage with the given dimensions.
+     * This is equivalent to the constructor:
+     * <pre>
+     * AcceleratedImage(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB), AcceleratedImage.TRANSLUCENT)
+     * </pre>
+     * 
+     * @param width - the width of this AcceleratedImage's contents
+     * @param height - the height of this AcceleratedImage's contents
+     */
+    public AcceleratedImage(int width, int height)
+    {
+        bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        quality = TRANSLUCENT;
+        transform = new AffineTransform();
+        transparency = 1;
+        vi = null;
+    }
+    
+    /**
      * Creates a new AcceleratedImage with the given BufferedImage.
      * The quality given with {@code bi.getTransparency()} is used for the quality of the
      *  AcceleratedImage.
@@ -430,7 +449,7 @@ public class AcceleratedImage extends Image
             {
                 AffineTransform prev = g.getTransform();
                 g.transform(transform);
-                g.drawImage(vi, x, y, null);
+                g.drawImage(vi, (int)(x/transform.getScaleX()), (int)(y/transform.getScaleY()), null);
                 g.setTransform(prev);
             }
         } while (vi.contentsLost());

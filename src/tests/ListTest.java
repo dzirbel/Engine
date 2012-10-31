@@ -80,8 +80,22 @@ public class ListTest
         before = System.nanoTime();
         for (int i = 0; i < count; i++)
         {
-            ListUtil.get(new Integer((int) (Math.random()*100)), nums);
+            Integer toFind = new Integer((int) (Math.random()*100));
+            if (ListUtil.get(toFind, nums) == -1)
+            {
+                System.out.println("Not Found: " + toFind);
+            }
         }
+        
+        for (int i = 0; i < count; i++)
+        {
+            Integer toFind = new Integer((int) (Math.random()*100) + 150);
+            if (ListUtil.get(toFind, nums) != -1)
+            {
+                System.out.println("Erroneously Found: " + toFind);
+            }
+        }
+        
         after = System.nanoTime();
         
         System.out.println("Getting: " + (after - before)/1000000);

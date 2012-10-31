@@ -56,6 +56,10 @@ public class Tooltip implements Runnable
         this.text = text;
         this.hoverArea = hoverArea;
         this.theme = theme;
+        if (theme == null)
+        {
+            this.theme = new TooltipTheme();
+        }
         
         hovering = false;
         visibility = Visibility.INVISIBLE;
@@ -132,6 +136,15 @@ public class Tooltip implements Runnable
     }
     
     /**
+     * Moves this Tooltip to the mouse's current location (keeping the theme's offset).
+     */
+    public void moveToMouse()
+    {
+        location = new Point(Listener.getMouse().x + theme.cursorOffset.x,
+                Listener.getMouse().y + theme.cursorOffset.y);
+    }
+    
+    /**
      * Sets the theme of this Tooltip used to configure it.
      * The Tooltip's image will be recreated in the next call to {@link #draw(Graphics2D)} or
      *  {@link #create(Graphics2D)}.
@@ -157,7 +170,7 @@ public class Tooltip implements Runnable
         {
             if (hovering)
             {
-                if (!hoverArea.contains(Listener.getMouseLocation()))
+                if (!hoverArea.contains(Listener.getMouse()))
                 {
                     hovering = false;
                     hoverTime = System.nanoTime();
@@ -167,13 +180,13 @@ public class Tooltip implements Runnable
                 {
                     hoverTime = System.nanoTime();
                     visibility = Visibility.FADING_IN;
-                    location = new Point(Listener.getMouseLocation().x + theme.cursorOffset.x,
-                            Listener.getMouseLocation().y + theme.cursorOffset.y);
+                    location = new Point(Listener.getMouse().x + theme.cursorOffset.x,
+                            Listener.getMouse().y + theme.cursorOffset.y);
                 }
             }
             else
             {
-                if (hoverArea.contains(Listener.getMouseLocation()))
+                if (hoverArea != null && hoverArea.contains(Listener.getMouse()))
                 {
                     hovering = true;
                     hoverTime = System.nanoTime();
@@ -262,7 +275,6 @@ public class Tooltip implements Runnable
                 create(g);
             }
             
-            System.out.println("alpha: " + alpha);
             image.setTransparency(alpha);
             image.draw(location.x, location.y, g);
         }

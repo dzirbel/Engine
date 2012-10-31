@@ -25,6 +25,10 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
 {
     private static ArrayList<NotificationRequest> notifications = new ArrayList<NotificationRequest>();
     
+    private static boolean shiftHeld = false;
+    private static boolean controlHeld = false;
+    private static boolean altHeld = false;
+    
     /**
      * Corresponds to a key press, triggered when the user presses a key on the keyboard.
      * Valid codes are {@link Listener#CODE_KEY_ALL} or any virtual keyboard code, accessible from
@@ -319,6 +323,19 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      */
     public void keyPressed(KeyEvent event)
     {
+        if (event.getKeyCode() == KeyEvent.VK_CONTROL)
+        {
+            controlHeld = true;
+        }
+        else if (event.getKeyCode() == KeyEvent.VK_SHIFT)
+        {
+            shiftHeld = true;
+        }
+        else if (event.getKeyCode() == KeyEvent.VK_ALT)
+        {
+            altHeld = true;
+        }
+        
         for (int i = key_pressed_start; i < key_released_start; i++)
         {
             try
@@ -347,6 +364,19 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      */
     public void keyReleased(KeyEvent event)
     {
+        if (event.getKeyCode() == KeyEvent.VK_CONTROL)
+        {
+            controlHeld = false;
+        }
+        else if (event.getKeyCode() == KeyEvent.VK_SHIFT)
+        {
+            shiftHeld = false;
+        }
+        else if (event.getKeyCode() == KeyEvent.VK_ALT)
+        {
+            altHeld = false;
+        }
+        
         for (int i = key_released_start; i < mouse_pressed_start; i++)
         {
             try
@@ -550,7 +580,7 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      * 
      * @return the location of the mouse pointer
      */
-    public static Point getMouseLocation()
+    public static Point getMouse()
     {
         return mouseLocation;
     }
@@ -591,6 +621,36 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Determines whether the "shift" key is currently pressed.
+     * 
+     * @return true if the shift key is held, false otherwise
+     */
+    public static boolean shiftHeld()
+    {
+        return shiftHeld;
+    }
+    
+    /**
+     * Determines whether the "control" key is currently pressed.
+     * 
+     * @return true if the control key is held, false otherwise
+     */
+    public static boolean controlHeld()
+    {
+        return controlHeld;
+    }
+    
+    /**
+     * Determines whether the "alt" key is currently pressed.
+     * 
+     * @return true if the alt key is held, false otherwise
+     */
+    public static boolean altHeld()
+    {
+        return altHeld;
     }
     
     /**
