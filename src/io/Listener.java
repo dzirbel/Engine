@@ -21,9 +21,11 @@ import java.util.ArrayList;
  * 
  * @author zirbinator
  */
-public class Listener implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener
+public class Listener implements KeyListener, MouseMotionListener, MouseListener,
+        MouseWheelListener
 {
-    private static ArrayList<NotificationRequest> notifications = new ArrayList<NotificationRequest>();
+    private static ArrayList<NotificationRequest> notifications = 
+            new ArrayList<NotificationRequest>();
     
     private static boolean shiftHeld = false;
     private static boolean controlHeld = false;
@@ -212,7 +214,8 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
      */
     public static void requestNotification(Object object, Method method, int type)
     {
-        notifications.add(getStart(type), new NotificationRequest(object, method, type, getCode(type)));
+        notifications.add(getStart(type),
+                new NotificationRequest(object, method, type, getCode(type)));
         shiftStarts(type);
     }
     
@@ -241,7 +244,8 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
     {
         try
         {
-            notifications.add(getStart(type), new NotificationRequest(object, methodName, type, code));
+            notifications.add(getStart(type),
+                    new NotificationRequest(object, methodName, type, code));
         }
         catch (NoSuchMethodException ex)
         {
@@ -277,7 +281,8 @@ public class Listener implements KeyListener, MouseMotionListener, MouseListener
     {
         try
         {
-            notifications.add(getStart(type), new NotificationRequest(object, methodName, type, getCode(type)));
+            notifications.add(getStart(type),
+                    new NotificationRequest(object, methodName, type, getCode(type)));
         }
         catch (NoSuchMethodException ex)
         {

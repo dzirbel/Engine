@@ -65,7 +65,8 @@ public class NotificationRequest
      * @throws IllegalArgumentException if the given method is null or the given type or code
      *  is invalid
      */
-    public NotificationRequest(Object object, Method method, int type, int code) throws IllegalArgumentException
+    public NotificationRequest(Object object, Method method, int type, int code)
+            throws IllegalArgumentException
     {
         this.object = object;
         this.method = method;
@@ -113,7 +114,8 @@ public class NotificationRequest
      *  is invalid
      * @throws NoSuchMethodException if the given method name is invalid
      */
-    public NotificationRequest(Object object, String methodName, int type, int code) throws IllegalArgumentException,
+    public NotificationRequest(Object object, String methodName, int type, int code)
+            throws IllegalArgumentException,
             NoSuchMethodException
     {
         this(object, getMethod(object, methodName, type), type, code);
@@ -153,8 +155,8 @@ public class NotificationRequest
         }
         if (type == Listener.TYPE_MOUSE_PRESSED || type == Listener.TYPE_MOUSE_RELEASED)
         {
-            return code == Listener.CODE_BUTTON1 || code == Listener.CODE_BUTTON2 || code == Listener.CODE_BUTTON3
-                    || code == Listener.CODE_BUTTON_ALL;
+            return code == Listener.CODE_BUTTON1 || code == Listener.CODE_BUTTON2 || 
+                    code == Listener.CODE_BUTTON3 || code == Listener.CODE_BUTTON_ALL;
         }
         if (type == Listener.TYPE_MOUSE_WHEEL)
         {
@@ -196,7 +198,8 @@ public class NotificationRequest
      * @throws NoSuchMethodException if no suitable method is found
      * @throws IllegalArgumentException if the given type is invalid
      */
-    private static Method getMethod(Object object, String name, int type) throws NoSuchMethodException,
+    private static Method getMethod(Object object, String name, int type)
+            throws NoSuchMethodException,
             IllegalArgumentException
     {
         Class<?> eventClass;
@@ -251,8 +254,9 @@ public class NotificationRequest
             }
         }
         
-        throw new NoSuchMethodException("Invalid method name: type " + object.getClass().getCanonicalName()
-                + " does not support " + "a valid method named " + name);
+        throw new NoSuchMethodException("Invalid method name: type " + 
+                object.getClass().getCanonicalName() + " does not support a valid method named " + 
+                name);
     }
     
     /**
@@ -341,8 +345,8 @@ public class NotificationRequest
         if (type == Listener.TYPE_MOUSE_MOVED || type == Listener.TYPE_MOUSE_PRESSED
                 || type == Listener.TYPE_MOUSE_RELEASED || type == Listener.TYPE_MOUSE_DRAGGED)
         {
-            if (code == event.getButton() || code == Listener.CODE_BUTTON_ALL || type == Listener.TYPE_MOUSE_MOVED
-                    || type == Listener.TYPE_MOUSE_DRAGGED)
+            if (code == event.getButton() || code == Listener.CODE_BUTTON_ALL || 
+                    type == Listener.TYPE_MOUSE_MOVED || type == Listener.TYPE_MOUSE_DRAGGED)
             {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0)
@@ -380,12 +384,13 @@ public class NotificationRequest
      * @throws IllegalAccessException thrown if the target method is incorrectly configured
      * @throws InvocationTargetException thrown if the target method is incorrectly configured
      */
-    public boolean call(MouseWheelEvent event) throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException
+    public boolean call(MouseWheelEvent event) throws IllegalArgumentException,
+            IllegalAccessException, InvocationTargetException
     {
         if (type == Listener.TYPE_MOUSE_WHEEL)
         {
-            if (Listener.isUp(code) == Listener.isUp(event.getScrollAmount()) || code == Listener.CODE_SCROLL_BOTH)
+            if (Listener.isUp(code) == Listener.isUp(event.getScrollAmount()) || 
+                    code == Listener.CODE_SCROLL_BOTH)
             {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0)

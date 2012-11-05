@@ -105,11 +105,8 @@ public class AcceleratedImage extends Image
      */
     public AcceleratedImage(int width, int height)
     {
-        bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        quality = TRANSLUCENT;
-        transform = new AffineTransform();
-        transparency = 1;
-        vi = null;
+        this(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB),
+                AcceleratedImage.TRANSLUCENT);
     }
     
     /**
@@ -449,7 +446,8 @@ public class AcceleratedImage extends Image
             {
                 AffineTransform prev = g.getTransform();
                 g.transform(transform);
-                g.drawImage(vi, (int)(x/transform.getScaleX()), (int)(y/transform.getScaleY()), null);
+                g.drawImage(vi, (int)(x/transform.getScaleX()), (int)(y/transform.getScaleY()),
+                        null);
                 g.setTransform(prev);
             }
         } while (vi.contentsLost());

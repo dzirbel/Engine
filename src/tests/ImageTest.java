@@ -179,7 +179,8 @@ public class ImageTest implements Runnable
                 aSum += acceleratedTimes.get(i*cycles + j);
                 bSum += bufferedTimes.get(i*cycles + j);
             }
-            System.out.println("   a: " + aSum/cycles + " (" + acceleratedImages.get(i).getQuality() + ")");
+            System.out.println("   a: " + aSum/cycles + 
+                    " (" + acceleratedImages.get(i).getQuality() + ")");
             System.out.println("   b: " + bSum/cycles);
             System.out.println("   diff: " + (bSum/cycles - aSum/cycles));
             System.out.println();

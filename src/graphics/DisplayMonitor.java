@@ -41,9 +41,10 @@ public class DisplayMonitor
         int maxRefreshRate = 0;
         for (int i = 0; i < modes.length; i++)
         {
-            if (modes[i].getWidth() > maxWidth || modes[i].getHeight() > maxHeight || modes[i].getWidth() == maxWidth
-                    && modes[i].getHeight() == maxHeight
-                    && (modes[i].getBitDepth() > maxBitDepth || modes[i].getRefreshRate() > maxRefreshRate))
+            if (modes[i].getWidth() > maxWidth || modes[i].getHeight() > maxHeight || 
+                    (modes[i].getWidth() == maxWidth && modes[i].getHeight() == maxHeight && 
+                    (modes[i].getBitDepth() > maxBitDepth || 
+                            modes[i].getRefreshRate() > maxRefreshRate)))
             {
                 maxHeight = modes[i].getHeight();
                 maxWidth = modes[i].getWidth();
