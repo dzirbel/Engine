@@ -25,6 +25,7 @@ public class Tooltip implements Runnable
     private AcceleratedImage image;
     
     private boolean hovering;
+    private boolean visible;
     
     private float alpha;
     
@@ -62,6 +63,7 @@ public class Tooltip implements Runnable
         }
         
         hovering = false;
+        visible = false;
         visibility = Visibility.INVISIBLE;
         hoverTime = -1;
         image = null;
@@ -136,6 +138,30 @@ public class Tooltip implements Runnable
     }
     
     /**
+     * Determines whether this Tooltip is currently set to be visible, regardless of the cursor.
+     * 
+     * @return true if this Tooltip will be visible regardless of the cursor, false if its
+     *  visibility is dependent on the cursor
+     * @see #setVisible(boolean)
+     */
+    public boolean isSetVisible()
+    {
+        return visible;
+    }
+    
+    /**
+     * Sets whether this Tooltip is set to visible regardless of the cursor.
+     * 
+     * @param visible - true if this Tooltip should be visible regardless of the cursor, false if
+     *  its visibility should be dependent on the cursor
+     * @see #isSetVisible()
+     */
+    public void setVisible(boolean visible)
+    {
+        this.visible = visible;
+    }
+    
+    /**
      * Moves this Tooltip to the mouse's current location (keeping the theme's offset).
      */
     public void moveToMouse()
@@ -168,9 +194,9 @@ public class Tooltip implements Runnable
         long lastUpdate = System.nanoTime();
         while (true)
         {
-            if (hovering)
+            if (hovering || visible)
             {
-                if (!hoverArea.contains(Listener.getMouse()))
+                if (!hoverArea.contains(Listener.getMouse()) && !visible)
                 {
                     hovering = false;
                     hoverTime = System.nanoTime();
