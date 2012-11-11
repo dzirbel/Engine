@@ -38,15 +38,6 @@ public class ButtonListener
      */
     public ButtonListener(Rectangle button, Method method, Object object)
     {
-        if (method == null)
-        {
-            throw new IllegalArgumentException("Null method");
-        }
-        if (object == null)
-        {
-            throw new IllegalArgumentException("Null object");
-        }
-        
         this.method = method;
         this.object = object;
         this.button = button;
@@ -162,6 +153,10 @@ public class ButtonListener
      */
     public Rectangle getButton()
     {
+        if (button == null)
+        {
+            return null;
+        }
         return (Rectangle) button.clone();
     }
     
@@ -176,7 +171,7 @@ public class ButtonListener
      */
     public void setButton(Rectangle button)
     {
-        if (!this.button.equals(button) && button != null)
+        if (this.button == null || (!this.button.equals(button) && button != null))
         {
             this.button = button;
             pressed = false;
@@ -277,7 +272,7 @@ public class ButtonListener
      */
     public void mouseReleased(MouseEvent e)
     {
-        if (pressed)
+        if (pressed && method != null && object != null)
         {
             int numArgs = method.getParameterTypes().length;
             Object[] args = new Object[numArgs];
