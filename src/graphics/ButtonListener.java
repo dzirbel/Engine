@@ -249,7 +249,7 @@ public class ButtonListener
      */
     public void mousePressed(MouseEvent e)
     {
-        if (on && button.contains(e.getLocationOnScreen()))
+        if (button != null && on && button.contains(e.getLocationOnScreen()))
         {
             pressed = true;
         }
