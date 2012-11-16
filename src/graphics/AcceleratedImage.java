@@ -11,8 +11,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
 import java.awt.image.VolatileImage;
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
@@ -151,14 +152,41 @@ public class AcceleratedImage extends Image
      */
     public AcceleratedImage(String filename) throws IOException
     {
-        loadImage(filename, -1);
+        this(filename, -1);
+    }
+    
+    /**
+     * Creates a new AcceleratedImage with the contents of the given InputStream and the given
+     *  quality.
+     * 
+     * @param stream - the source of data from which the contents of this AcceleratedImage should
+     *  be read
+     * @param quality - the quality: {@link #OPAQUE}, {@link #BITMASK}, or {@link #TRANSLUCENT}
+     * @throws IOException thrown if there is any error reading from the given stream
+     */
+    public AcceleratedImage(InputStream stream, int quality) throws IOException
+    {
+        loadImage(stream, quality);
         transform = new AffineTransform();
         transparency = 1;
         vi = null;
     }
     
     /**
-     * Loads the given image found at the filename into the contents of this AcccelerateImage,
+     * Creates a new AcceleratedImage with the contents of the given InputStream and the detected
+     *  quality.
+     * 
+     * @param stream - the source of data from which the contents of this AcceleratedImage should
+     *  be read
+     * @throws IOException thrown if there is any error reading from the given stream
+     */
+    public AcceleratedImage(InputStream stream) throws IOException
+    {
+        this(stream, -1);
+    }
+    
+    /**
+     * Loads the image found at the filename into the contents of this AcccelerateImage,
      *  along with the given quality.
      * The current transform and transparency are reset to the identity matrix and 1.0.
      * 
@@ -167,10 +195,30 @@ public class AcceleratedImage extends Image
      *  {@code -1} to use the quality of the loaded image
      * @throws IOException thrown if there is any error reading from the given filename
      * @throws IllegalArgumentException thrown if the given quality is unknown and not {@code -1}
+     * @see #loadImage(InputStream, int)
      */
-    public void loadImage(String filename, int quality) throws IOException
+    private void loadImage(String filename, int quality) throws IOException
     {
-        bi = ImageIO.read(new File(filename));
+        loadImage(new FileInputStream(filename), quality);
+    }
+    
+    /**
+     * Loads the image from the given stream into the contents of this AcceleratedImage, along with
+     *  the given quality.
+     * The majority of the loading is done with {@link ImageIO#read(InputStream)}.
+     * The current transform and transparency are reset to the identity matrix and 1.0.
+     * 
+     * @param in - the source of the data for the contents of this AcceleratedImage
+     * @param quality - the quality: {@link #OPAQUE}, {@link #BITMASK}, {@link #TRANSLUCENT}, or
+     *  {@code -1} to use the quality of the loaded image
+     * @throws IOException thrown if there is any error reading from the given stream
+     * @throws IllegalArgumentException thrown if the given quality is unknown and not {@code -1}
+     * @see {@link #loadImage(String, int)}
+     */
+    private void loadImage(InputStream in, int quality) throws IOException
+    {
+        bi = ImageIO.read(in);
+        
         transform = new AffineTransform();
         transparency = 1;
         if (quality == -1)
