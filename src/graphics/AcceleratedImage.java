@@ -167,9 +167,6 @@ public class AcceleratedImage extends Image
     public AcceleratedImage(InputStream stream, int quality) throws IOException
     {
         loadImage(stream, quality);
-        transform = new AffineTransform();
-        transparency = 1;
-        vi = null;
     }
     
     /**
@@ -221,6 +218,7 @@ public class AcceleratedImage extends Image
         
         transform = new AffineTransform();
         transparency = 1;
+        vi = null;
         if (quality == -1)
         {
             this.quality = bi.getTransparency();
@@ -377,29 +375,6 @@ public class AcceleratedImage extends Image
     }
     
     /**
-     * Gets the AffineTransform applied to this AcceleratedImage when drawing.
-     * Note: the returned AffineTransform is not cloned,
-     *  so any changes made to it will be reflected in the AcceleratedImage.
-     * 
-     * @return the transformation matrix used by this AcceleratedImage
-     */
-    public AffineTransform getTransform()
-    {
-        return transform;
-    }
-    
-    /**
-     * Sets the AffineTransform applied to this AcceleratedImage
-     *  when drawing to the given one.
-     * 
-     * @param tranform - the new transformation matrix
-     */
-    public void setTransform(AffineTransform transform)
-    {
-        this.transform = new AffineTransform(transform);
-    }
-    
-    /**
      * Sets the scale of the transformation matrix to the given values.
      * Note: this method resets the previous scale before scaling.
      * This is equivalent to calling {@code getTransform().setToScale(x, y)}.
@@ -456,6 +431,27 @@ public class AcceleratedImage extends Image
             this.transparency = Math.max(0, Math.min(1, transparency));
             vi = null;
         }
+    }
+    
+    /**
+     * Permanently resizes this AcceleratedImage to the given size.
+     * That is, the contents of this BufferedImage are destroyed and set a resized version with the
+     *  given width and height.
+     * The transparency and transform are reset, as well as the volatile buffer.
+     * 
+     * @param width - the new width for this AcceleratedImage, in pixels
+     * @param height - the new height for this AcceleratedImage, in pixels
+     */
+    public void resize(int width, int height)
+    {
+        BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = (Graphics2D) resized.createGraphics();
+        g.setComposite(AlphaComposite.Src);
+        g.drawImage(bi, 0, 0, width, height, null);
+        bi = resized;
+        transform.setToIdentity();
+        transparency = 1;
+        vi = null;
     }
     
     /**

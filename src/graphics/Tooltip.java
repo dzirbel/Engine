@@ -209,6 +209,18 @@ public class Tooltip implements Runnable
                     visibility = Visibility.FADING_IN;
                     location = new Point(Listener.getMouse().x + theme.cursorOffset.x,
                             Listener.getMouse().y + theme.cursorOffset.y);
+                    
+                    if (image != null)
+                    {
+                        if (location.x + image.getWidth() > DisplayMonitor.screen.width)
+                        {
+                            location.x = DisplayMonitor.screen.width - image.getWidth();
+                        }
+                        if (location.y + image.getHeight() > DisplayMonitor.screen.height)
+                        {
+                            location.y = DisplayMonitor.screen.height - image.getHeight();
+                        }
+                    }
                 }
             }
             else
@@ -287,6 +299,15 @@ public class Tooltip implements Runnable
                 (float) (theme.textBuffer/2f + stringBounds.getHeight()));
         
         image = new AcceleratedImage(bi, AcceleratedImage.TRANSLUCENT);
+        
+        if (location.x + image.getWidth() > DisplayMonitor.screen.width)
+        {
+            location.x = DisplayMonitor.screen.width - image.getWidth();
+        }
+        if (location.y + image.getHeight() > DisplayMonitor.screen.height)
+        {
+            location.y = DisplayMonitor.screen.height - image.getHeight();
+        }
     }
     
     /**
