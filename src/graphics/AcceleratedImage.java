@@ -376,8 +376,8 @@ public class AcceleratedImage extends Image
     
     /**
      * Sets the scale of the transformation matrix to the given values.
-     * Note: this method resets the previous scale before scaling.
-     * This is equivalent to calling {@code getTransform().setToScale(x, y)}.
+     * Note: this method resets the previous scale and all other transformations before scaling.
+     * Use {@link #setTransform(AffineTransform)} to aggregate multiple transformations.
      * 
      * @param x - the x-component of the scale
      * @param y - the y-component of the scale
@@ -390,8 +390,8 @@ public class AcceleratedImage extends Image
     
     /**
      * Sets the rotation of the transformation matrix to the given theta.
-     * Note: this method resets the previous rotation before rotating.
-     * This is equivalent to calling {@code getTransform().setToRotation(theta)}.
+     * Note: this method resets the previous rotation and all other transformations before rotating.
+     * Use {@link #setTransform(AffineTransform)} to aggregate multiple transformations.
      * 
      * @param theta - the rotation amount in radians (positive rotations rotates from the positive
      *  x-axis toward the positive y-axis)
@@ -400,6 +400,61 @@ public class AcceleratedImage extends Image
     public void setRotation(double theta)
     {
         transform.setToRotation(theta);
+    }
+    
+    /**
+     * Sets the rotation of the transformation matrix to the given theta, centered at the given
+     *  location.
+     * Note: this method resets the previous rotation and all other transformations before rotating.
+     * Use {@link #setTransform(AffineTransform)} to aggregate multiple transformations.
+     * 
+     * @param theta - the rotation amount in radians (positive rotations rotates from the positive
+     *  x-axis toward the positive y-axis)
+     * @param centerx - the x-coordinate of the anchor point
+     * @param centery - the y-coordinate of the anchor point
+     * @see AffineTransform#setToRotation(double, double, double)
+     */
+    public void setRotation(double theta, double centerx, double centery)
+    {
+        transform.setToRotation(theta, centerx, centery);
+    }
+    
+    /**
+     * Sets the translation of the transformation matrix to the given location.
+     * Note: this method resets the previous translation
+     *  and all other transformations before translating.
+     * Use {@link #setTransform(AffineTransform)} to aggregate multiple transformations.
+     * 
+     * @param x - the distance to translate in the x direction
+     * @param y - the distance to translate in the y direction
+     */
+    public void setTranslation(double x, double y)
+    {
+        transform.setToTranslation(x, y);
+    }
+    
+    /**
+     * Gets a copy of the current transformation applied to this AcceleratedImage when drawing.
+     * 
+     * @return the current transformation matrix
+     * @see #setTransform(AffineTransform)
+     */
+    public AffineTransform getTransform()
+    {
+        return (AffineTransform) transform.clone();
+    }
+    
+    /**
+     * Sets the current transformation applied to this AcceleratedImage when drawing.
+     * While methods such as {@link #setRotation(double)} and {@link #setScale(double, double)}
+     *  can be used as a convenience, this functions allows for the full range of transformations
+     *  as well as transformation aggregation.
+     * 
+     * @param transform - the matrix used to transform this AcceleratedImage
+     */
+    public void setTransform(AffineTransform transform)
+    {
+        this.transform = new AffineTransform(transform);
     }
     
     /**
