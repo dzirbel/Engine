@@ -29,7 +29,7 @@ The Engine is currently evolving along with the Game of Life project with the so
 
 # Using the Engine
 
-The Engine is functional software that gives desktop Java applications some amount of graphics support. To include the Engine in a program, simply include the most recent jar binary, which can be found in the "Downloads" section of the repository (github.com/zirbinator/Engine).
+The Engine is functional software that gives desktop Java applications some amount of graphics support. To include the Engine in a program, simply include the most recent jar binary, which can be found in the [root repository folder](http://www.github.com/zirbinator/Engine) named "Engine X.X.XX.jar". To download it, click on the name and then select "View Raw". I apologize for the inconvenience; github has recently removed Downloads and I have not yet moved to an external host.
 
 ## Images
 
