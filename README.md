@@ -1,5 +1,7 @@
 # The Engine
 
+<br>
+
 The Engine is a collection of general-purpose utility classes and functions written in Java created by zirbinator [Dominic Zirbel, zirbinator@gmail.com]. This software is open-source and free to use under the GNU General Public License, Version 3 (http://www.gnu.org/licenses/gpl.html).
 
 ## About
@@ -29,7 +31,7 @@ The Engine is currently evolving along with the Game of Life project with the so
 
 # Using the Engine
 
-The Engine is functional software that gives desktop Java applications some amount of graphics support. To include the Engine in a program, simply include the most recent jar binary, which can be found in the [root repository folder](http://www.github.com/zirbinator/Engine) named "Engine X.X.XX.jar". To download it, click on the name and then select "View Raw". I apologize for the inconvenience; github has recently removed Downloads and I have not yet moved to an external host.
+The Engine is functional software that gives desktop Java applications some amount of graphics support. To include the Engine in a program, simply include the most recent jar binary, which can be found in the [root repository folder](http://www.github.com/zirbinator/Engine) named "Engine X.X.XX.jar". To download, either select the file and "View Raw" or download the entire repository as a zip and extract it.
 
 ## Images
 
