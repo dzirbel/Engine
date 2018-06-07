@@ -5,10 +5,8 @@ import java.util.List;
 
 /**
  * Provides a simple implementation of common list utilities.
- * Utilities provided by this class typically use binary searches to locate elements in sorted 
+ * Utilities provided by this class typically use binary searches to locate elements in sorted
  *  lists.
- * 
- * @author zirbinator
  */
 public class ListUtil
 {
@@ -19,7 +17,7 @@ public class ListUtil
      * <pre>
      * ListUtil.get(element, list, 0, list.size() - 1)
      * </pre>
-     * 
+     *
      * @param element - the element for which to search
      * @param list - the list in which to search
      * @return the index of the given element, or -1 if it does not exist in the list
@@ -29,12 +27,12 @@ public class ListUtil
     {
         return get(element, list, 0, list.size() - 1);
     }
-    
+
     /**
      * Gets the index of the given element in the given list using a binary search.
      * The list is searched from the given start (low) to end (high) indexes.
      * Use {@link #get(Comparable, ArrayList)} to search the entire list.
-     * 
+     *
      * @param element - the element for which to search
      * @param list - the sorted list in which to search
      * @param low - the first index to search
@@ -64,17 +62,17 @@ public class ListUtil
                 return mid;
             }
         }
-        
+
         return -1;
     }
-    
+
     /**
      * Determines whether the given list contains the given element using a binary search.
      * This is equivalent to the expression
      * <pre>
      * ListUtil.get(element, list) != -1
      * </pre>
-     * 
+     *
      * @param element - the element for which to search
      * @param list - the sorted list in which to search
      * @return true if the given element is contained in the given list, false otherwise
@@ -84,7 +82,7 @@ public class ListUtil
     {
         return get(element, list) != -1;
     }
-    
+
     /**
      * Gets the index at which to add the given element in the given list using a binary search.
      * The element is added at an index such that the list remains ordered in ascending order,
@@ -98,7 +96,7 @@ public class ListUtil
      *  <li>for the list (1,2,2,3,5) and element 2, the add index could be either 1, 2, or 3</li>
      *  <li>for the list (-1, 3, 10) and element 20, the add index is 3</li>
      * </ul>
-     * 
+     *
      * @param element - the element to be added
      * @param list - the sorted list to which the element will be added
      * @return the index at which to add the given element (as with
@@ -110,11 +108,11 @@ public class ListUtil
         {
             return 0;
         }
-        
+
         int low = 0;
         int high = list.size() - 1;
         int mid;
-        
+
         while (high >= low)
         {
             mid = (low + high) / 2;
@@ -153,17 +151,17 @@ public class ListUtil
                 return mid;
             }
         }
-        
+
         return -1; // should never happen unless the list is not sorted
     }
-    
+
     /**
      * Adds the given element to the given list such that the list remains ordered.
      * This is equivalent the statement
      * <pre>
      * list.add(ListUtil.getAddIndex(element, list), element)
      * </pre>
-     * 
+     *
      * @param element - the element to be added
      * @param list - the sorted list to which the element should be added
      */
@@ -171,7 +169,7 @@ public class ListUtil
     {
         list.add(getAddIndex(element, list), element);
     }
-    
+
     /**
      * Removes the given element from the given list.
      * This is equivalent to the statement
@@ -179,7 +177,7 @@ public class ListUtil
      * list.remove(element)
      * </pre>
      * but typically executes more quickly.
-     * 
+     *
      * @param element - the element to remove
      * @param list - the sorted list from which the element should be removed
      * @return true if the list contains the element and it was removed, false otherwise
@@ -194,21 +192,21 @@ public class ListUtil
         list.remove(index);
         return true;
     }
-    
+
     /**
      * Finds a partition of the given list and sorts it.
-     * 
+     *
      * @param list - the list to be sorted
      * @param left - the left (lower) bound of the segment to sort
      * @param right - the right (upper) bound of the segment to sort
-     * @return 
+     * @return
      */
     private static <T extends Comparable<T>> int partition(List<T> list, int left, int right)
     {
         int i = left, j = right;
         T temp;
         T pivot = list.get((left + right)/2);
-        
+
         while (i <= j)
         {
             while (list.get(i).compareTo(pivot) < 0)
@@ -228,16 +226,16 @@ public class ListUtil
                 j--;
             }
         }
-        
+
         return i;
     }
-    
+
     /**
      * Sorts a segment of the given list using a recursive implementation of the quicksort
      *  algorithm.
      * For example, to sort the entire list use {@code 0} as the left boundary of the segment and
      *  {@code list.size() - 1} as the right boundary.
-     * 
+     *
      * @param list - the list to be sorted
      * @param left - the left (lower) boundary of the segment
      * @param right - the right (upper) boundary of the segment
@@ -248,7 +246,7 @@ public class ListUtil
         {
             return;
         }
-        
+
         int index = partition(list, left, right);
         if (left < index - 1)
         {
@@ -259,14 +257,14 @@ public class ListUtil
             sort(list, index, right);
         }
     }
-    
+
     /**
      * Sorts the given list using a recursive implementation of the quicksort algorithm.
      * This is equivalent to the statement
      * <pre>
      * ListUtil.sort(list, 0, list.size() - 1)
      * </pre>
-     * 
+     *
      * @param list - the list to be sorted
      */
     public static <T extends Comparable<T>> void sort(List<T> list)
